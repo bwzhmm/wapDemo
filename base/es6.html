@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <script type="text/javascript">
+      // function callback(){
+      //   console.log("Done");
+      // }
+      // console.log("before  setTimeout");
+      // setTimeout(callback,1000);//1秒后调用callback
+      // console.log("after setTimeout");
+      //   new Promise(function () {});
+      //   console.log('支持Promise!');
+
+        //生成一个 0-2之间的随机数，如果小于1，则等待一段时间后返回成功，否则返回失败
+        // test()函数 有两个参数，并且这两参数 都是函数，成功执行resolve ，那么就可以用
+      //promise对象执行它，并在将来某个时刻获得成功或失败的结果。
+      // var p1 = new Promise(test); // p1是 promise的 对象,负责执行函数test
+      //  var p2 = p1.then(function (result){ // test内部是异步的，若执行成功则，告诉promise对象
+      //    consol.log('成功'+ result);
+      //  });
+      //  var p3 = p2.catch(function (reason){ //失败时
+      //    consol.log('失败'+ reason);
+      //  });
+
+       // 以上
+       // 简化为：
+       // new Promise(  function(resolve, reject){
+       //   console.log('start new promise');
+       //   var timeOut = Math.random()*2;
+       //     console.log('set timeout to'+timeOut+'seconds')
+       //   setTimeout(function(){
+       //      if(timeOut < 1){
+       //      console.log("call resolve()");
+       //       resolve('200 OK ')
+       //      }else{
+       //         console.log("call reject()");
+       //         reject('timeout in '+ timeOut + 'seconds');
+       //     }
+       //   },timeOut * 1000);
+       // }).then(function(result){
+       //      console.log('成功'+ result);
+       //   }).catch(function (reason){
+       //      console.log('失败'+ reason);
+       //   });
+
+      /* 串行执行一系列需要异步计算获得结果的任务 */
+      //0.5 秒后返回 input*input 的计算结果：
+      function multiply(input){
+        return new Promise(function(resolve,reject){
+          console.log(`multiply ${input} * ${input}`)
+          setTimeout(resolve,500,input*input);
+        });
+      }
+      //0.5 秒后返回 input+input 的计算结果：
+      function add(input){
+        return new Promise(function(resolve,reject){
+          console.log(`add ${input} + ${input}`)
+          setTimeout(resolve,500,input+input);
+        });
+      }
+      var p1 = new Promise(function(resolve, reject){
+        console.log('start new promise');
+        resolve(1);
+      });
+
+      p1.then(multiply)
+        .then(add)
+        .then(multiply)
+        .then(add)
+        .then(function(result){
+          console.log('Got value:'+ result)
+        });
+       /*并行执行异步任务 Promise.all()来实现； 如一个聊天系统，从两个不同的URL分别获得用户的个人信息和好友列表*/
+        var p1 = new Promise(function(resolve,reject){
+          setTimeout(resolve,500,"P1");
+        });
+        var p2 = new Promise(function(resolve,reject){
+            setTimeout(resolve,600,"P2");
+        });
+        //同时执行 p1 和p2 ,并在它们都完成后执行then；
+        Promise.all([p1,p2]).then(function(results){
+          console.log(results);
+        });
+        //同时向两个URL读取用户个人信息，若只需要获得先返回的结果即可，用Promise.race()实现。
+        Promise.race([p1,p2]).then(function(result){
+            console.log(results);//p1  由于p1执行比较快，Promise获取p1的结果，p2仍在继续执行，但结果将被丢弃
+        });
+    </script>
+  </body>
+</html>
