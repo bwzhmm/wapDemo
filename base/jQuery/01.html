@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="./jquery-3.3.1.js"></script>
+  </head>
+  <body>
+    <div id="test-jquery">
+      <p id="para-1" class="color-red">Javascript</p>
+      <p id="para-2" class="color-green">Haskell</p>
+      <p class="color-red color-green">Erlang</p>
+      <p name="name" class="color-black">Python</p>
+      <form class="test-form" target="_blank" action="#0" onsubmit="return false;">
+        <legend>注册新用户</legend>
+        <fieldset>
+          <p><label>名字：</label><input name="name"></p>
+          <p><label>邮件：</label><input name="email"></p>
+          <p><label>口令：</label><input name="password" type="password"></p>
+          <p><button type="submit" >注册</button></p>
+
+        </fieldset>
+      </form>
+
+    </div>
+    <!-- $本质上就是一个函数，但函数也是对象，所有$除可以直接调用外，有很多其他属性 -->
+  <script type="text/javascript">
+    console.log('jquery版本：'+ $.fn.jquery +window.jQuery+ window.$  + typeof($))
+    var selected = $('#para-1').innerText;
+      console.log('selected',selected)
+  </script>
+  </body>
+</html>
