@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <!--
+1, alert(1&&2) ,弹出2
+     原因：1》只要||前面为false，不管||的后面是true还是false，都返回||后面的值。
+          2》只要||前面值为true，不管||的后面是true还是false，都返回||前面的值
+          3》只要&&前面值是false，不管&&的后面是true还是false，都返回&&前面的值
+          4》只要&&前面值为true，不管&&的后面是true还是false，都返回&&后面的值
+
+
+   -->
+    <script type="text/javascript">
+    document.writeln("(1&&2) = >",(1&&2)+"<br/>");
+      var reg = /\bis\b/;
+      document.write('this is a boy  =>','this is a boy'.replace(reg,'X')+"<br/>");
+
+    </script>
+  </body>
+</html>
