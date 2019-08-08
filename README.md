@@ -1,3 +1,2 @@
-# wapDemo
-hi，this is a  demo for wapWeChat.
-123
+# 前端实践 
+1，预备课：js基础知识 ，css页面架构
