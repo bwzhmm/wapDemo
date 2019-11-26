@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>es5</title>
+</head>
+
+<body>
+    <script>
+        //1. 类型
+        /**
+         * 原始值：存取直接作用于它自身
+         * string number boolean null undefined
+         */
+
+        var fool = 1;
+        var bar = fool;
+        bar = 9;
+        // console.log(fool, bar); // 1 9
+
+        /**
+         * 复杂类型：存取时作用于它自身值的引用
+         * object array function 
+         */
+        var foolArry = [1, 2];
+        var barArry = foolArry;
+        barArry[0] = 9;
+        // console.log(foolArry[0], barArry[0])  // 9 9
+
+        //2. 对象
+        /**
+         * 使用直接量创建对象    var item = {}
+         * 
+         * 不适用保留字作为键名 
+         * var superman = {
+         * defaults:{ clark: 'kent'},
+         * hidden:true
+         * }
+         * 
+         * 使用同义词替换需要使用的保留字
+         * var superman ={
+         * type: 'alien'
+         * }
+         * 
+         * 
+         * 3,数组
+         * 
+         * 使用直接量创建数组 var items = [];
+         * 
+         * 向数组增加元素时使用Array#push 来替代直接赋值
+         * var someStack = [];
+         * someStack.push('abcaddd');
+         * 
+         * 当你需要拷贝数组时，使用Array#slice 
+         * var itemsCopy = [];
+         * itemCopy = items.slice();
+         * 
+         * 使用Array #slice 将类数组对象转换成数组
+         * function trigger() {
+         * var args = Array.prototype.slice.call(arguments);
+         * ....
+         * }
+         * 
+         * 
+         * 4,字符串
+         * 
+         * 使用单引号'' 包裹字符串  var name = 'Bob Parr'
+         * var fullNamr = 'Bob' + this.lastName;
+         * 
+         * 程序化生成的字符串使用array#join 连接而不是使用连接符
+         * function inbox(messages) {
+         * items = [];
+         * 
+         * for(i = 0; i < length; i++) {
+         * items[i] = '<li>' + messages[i].message + '</li>';
+         * }
+         * return '<ul>' + items.join('') + '</ul>';
+         * }
+         * 
+         * 
+         */
+
+        // 函数
+
+        // 1.函数表达式
+
+        //匿名函数表达式
+        var anonymous = function() {
+            return true;
+        };
+
+        //命名函数表达式
+        var named = function named() {
+            return true;
+        };
+
+        //立即调用的函数表达式（IIFE）
+        (function() {
+            console.log('welcome to the Internet. please follow me')
+        }());
+
+        //永远不要在一个非函数代码块（if while等）声明一个函数，需要在块外定义一个变量，然后将函数赋值给它
+        var test, currentUser = true;
+        if (currentUser) {
+            test = function test() {
+                console.log('Yup.')
+            }
+        }
+
+        //永远不要把参数命名为 arguments.将会取代函数作用域内的arguments对象
+        function yup(name, options, args) {
+
+        }
+    </script>
+</body>
+
+</html>
