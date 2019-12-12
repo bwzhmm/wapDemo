@@ -20,7 +20,7 @@
   558  git checkout master
   559  git checkout -b wang
   560  git status
-  561  git add src/main/java/com/htsc/itrmss/common/controller/ExamineController.java
+  561  git add src/main/java/com/baidu/itrmss/common/controller/ExamineController.java
   562  git status
   563  git commit -m 'fggjhbgj'
   564  git checkout devv
@@ -31,7 +31,7 @@
   569  git checkout devv
   570  git sttus
   571  git status
-  572  git add src/main/java/com/htsc/itrmss/common/controller/ExamineController.java
+  572  git add src/main/java/com/baidu/itrmss/common/controller/ExamineController.java
   573  git status
   574  git commit -m '12321'
   575  git stauts
@@ -42,7 +42,7 @@
   580  git pull 
   581  git merge wang
   582  git status
-  583  git add src/main/java/com/htsc/itrmss/common/controller/ExamineController.java
+  583  git add src/main/java/com/baidu/itrmss/common/controller/ExamineController.java
   584  git stauts
   585  git commit -m 'dsfdasf'
   586  git push 
@@ -54,10 +54,10 @@
   592  git status
   593  git log
   594  git status
-  595  git diff src/main/java/com/htsc/itrmss/common/controller/ExamineController.java
-  596  git reset HEAD src/main/java/com/htsc/itrmss/common/controller/ExamineController.java
+  595  git diff src/main/java/com/baidu/itrmss/common/controller/ExamineController.java
+  596  git reset HEAD src/main/java/com/baidu/itrmss/common/controller/ExamineController.java
   597  git status
-  598  git checkout -- src/main/java/com/htsc/itrmss/common/controller/ExamineController.java
+  598  git checkout -- src/main/java/com/baidu/itrmss/common/controller/ExamineController.java
   599  git status
   600  git log
   601  git revert -m 1 a6ea82a8e91673d02846d2c417251035a9f54897
