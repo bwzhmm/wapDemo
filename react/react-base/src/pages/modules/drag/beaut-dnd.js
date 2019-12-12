@@ -11,7 +11,7 @@ const grid = 8;
 const getItemStyle = (isDragging, draggableStyle) => ({
     // some basic styles to make the items look a bit nicer
     userSelect: 'none',
-    // padding: grid * 2,
+    padding: grid * 1,
     margin: `0 8px ${grid}px 0`,
     // change background colour if dragging
     background: isDragging ? 'lightgreen' : 'white',
@@ -242,7 +242,6 @@ class Permission extends Component {
         const { user, avatar, } = this.props;
         const { includeModules, excludeModules, currentBox, visible } = this.state;
 
-        // <span >111111111111111111111111</span>
         const reg = /\d+/g;
         let includeDroppable = _.map(includeModules, (row, key) => {
             // 从字符串row0, row1中的到索引顺序
@@ -268,15 +267,15 @@ class Permission extends Component {
                                                     snapshot.isDragging,
                                                     provided.draggableProps.style
                                                 )}>
-                                                <div className={styles.module_box}
+                                                <div className={styles.modulebox}
                                                     onMouseEnter={this.mouseEnter.bind(this, item.id)}
                                                     onMouseLeave={this.mouseLeave.bind(this, item.id)}>
                                                     <img src={defaultPng} />
-                                                    <span className={styles.module_text}>{item.content}</span>
+                                                    <span className={styles.moduletext}>{item.content}</span>
                                                     {
                                                         currentBox === item.id &&
-                                                        <span className={styles.module_delete} onClick={this.handleClickModule.bind(this, id, index, 'include')}>
-                                                            <Icon type='delete' style={{ marginRight: '10px' }} /> 移除
+                                                        <span  style={{ color: '#D92E2E' }} className={styles.moduledelete} onClick={this.handleClickModule.bind(this, id, index, 'include')}>
+                                                            <Icon type='delete' /> 移除
                                                             </span>
                                                     }
                                                 </div>
@@ -315,15 +314,15 @@ class Permission extends Component {
                                                     snapshot.isDragging,
                                                     provided.draggableProps.style
                                                 )}>
-                                                <div className={styles.module_box}
+                                                <div className={styles.modulebox}
                                                     onMouseEnter={this.mouseEnter.bind(this, item.id)}
                                                     onMouseLeave={this.mouseLeave.bind(this, item.id)}>
                                                     <img src={userPng} />
-                                                    <span className={styles.module_text}>{item.content}</span>
+                                                    <span className={styles.moduletext}>{item.content}</span>
                                                     {
                                                         currentBox === item.id &&
-                                                        <span className={styles.module_add} onClick={this.handleClickModule.bind(this, id, index, 'exclude')}>
-                                                            <Icon type='plus' style={{ marginRight: '10px' }} /> 添加
+                                                        <span style={{ color: '#1890ff' }} className={styles.moduleadd} onClick={this.handleClickModule.bind(this, id, index, 'exclude')}>
+                                                            <Icon type='plus'/> 添加
                                                             </span>
                                                     }
                                                 </div>
@@ -340,7 +339,7 @@ class Permission extends Component {
         });
         return (
             <div>
-                <Button type='primary' onClick={this.showDrawer}> Open </Button>
+                <Button style={{ margin: '10px' }}type='primary' onClick={this.showDrawer}> 打开弹框 </Button>
                 <Drawer
                     title='个人中心'
                     width={640}
@@ -358,13 +357,13 @@ class Permission extends Component {
                     </div>
                     <DragDropContext onDragEnd={this.onDragEnd.bind(this)}>
                         <div>
-                            <h3>模块管理</h3>
+                            <h3>管理</h3>
                             <div>
-                                <h4>已添加模块</h4>
+                                <h4>已添加</h4>
                                 {includeDroppable}
                             </div>
                             <div className={styles.clear} >
-                                <h4>未添加模块</h4>
+                                <h4>未添加</h4>
                                 {excludeDroppable}
                             </div>
                         </div>
