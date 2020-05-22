@@ -85,7 +85,7 @@
             console.log(key + "forEach  = " + value)
         });
 
-        Set对象允许你存储任何类型的唯一值， 无论是原始值或者是对象引用（ + 0 - 0， undefined undefined 是恒等的）（ NaN NaN是不恒等的， 只能有一个不能重复）
+        //  Set对象允许你存储任何类型的唯一值， 无论是原始值或者是对象引用（ + 0 - 0， undefined undefined 是恒等的）（ NaN NaN是不恒等的， 只能有一个不能重复）
 
         let mySet = new Set();
         mySet.add(1);
@@ -140,19 +140,19 @@
             return result;
         }
 
-        ES6 字符串
-        判断字符串是否包含子串： indexOf lastIndexOf 子串的位置
-        includes() 返回布尔值， 是否找到参数字符串
-        startsWith() 返回布尔值 参数字符串是否在原字符串的头部
-        endsWith() 返回布尔值 参数字符串是否在原字符串的尾部 'hello'.repeat(2);
-        字符串重复
-            'h'.padStart(5, 'o') //oooooh
-        'h'.padEnd(5, 'o') //hooooo  字符串补全
-        模板字符串 用反引号 ``
-        多行字符串 字符串插入变量和表达式 字符串中调用函数 模板字符串中的换行和空格都会被保留
-        let string = `hello'\n'world`
+        // ES6 字符串
+        // 判断字符串是否包含子串： indexOf lastIndexOf 子串的位置
+        // includes() 返回布尔值， 是否找到参数字符串
+        // startsWith() 返回布尔值 参数字符串是否在原字符串的头部
+        // endsWith() 返回布尔值 参数字符串是否在原字符串的尾部 'hello'.repeat(2);
+        // 字符串重复
+        //     'h'.padStart(5, 'o') //oooooh
+        // 'h'.padEnd(5, 'o') //hooooo  字符串补全
+        // 模板字符串 用反引号 ``
+        // 多行字符串 字符串插入变量和表达式 字符串中调用函数 模板字符串中的换行和空格都会被保留
+        // let string = `hello'\n'world`
 
-        过滤html字符串， 防止用户输入恶意内容
+        // 过滤html字符串， 防止用户输入恶意内容
 
         function f(stringArr, ...values) {
             let result = "";
@@ -169,23 +169,23 @@
         name = '<Amy&Mike>';
         f `<p>Hi,${name}.I would like send you some message.</P>`
 
-        数值 Number.isFinite() 检查数值是否有限
-        Number.isNaN() 检查一个值是否为NaN
-        Number.parseInt() 用于将给定字符串转化为指定进制的整数， 默认是十进制
-        Number.parseFloat() 用于把一个字符串解析成浮点数
-        Number.isInteger() 判断给定的参数是否为整数
-        Number.isSafeInteger() 判断值是否在安全范围内
+        // 数值 Number.isFinite() 检查数值是否有限
+        // Number.isNaN() 检查一个值是否为NaN
+        // Number.parseInt() 用于将给定字符串转化为指定进制的整数， 默认是十进制
+        // Number.parseFloat() 用于把一个字符串解析成浮点数
+        // Number.isInteger() 判断给定的参数是否为整数
+        // Number.isSafeInteger() 判断值是否在安全范围内
 
-        Math.cbrt(1);
-        计算一个数的立方根
-        Math.imul(1, 2) 两个数以32位带符号整数形式相乘的结果， 返回的也是一个32位的带符号的整数
-        Math.hypot(3, 4) 计算所有参数的平方和的平方根
-        Math.clz32(0) 用于返回数字的32位无符号整数形式的前到0的个数
-        Math.trunc() 返回数字的整数部分
-        Math.fround() 获取数字的32位单精度浮点数形式
-        Math.sign() 判断数字的符号(正， 负， 0)
+        // Math.cbrt(1);
+        // 计算一个数的立方根
+        // Math.imul(1, 2) 两个数以32位带符号整数形式相乘的结果， 返回的也是一个32位的带符号的整数
+        // Math.hypot(3, 4) 计算所有参数的平方和的平方根
+        // Math.clz32(0) 用于返回数字的32位无符号整数形式的前到0的个数
+        // Math.trunc() 返回数字的整数部分
+        // Math.fround() 获取数字的32位单精度浮点数形式
+        // Math.sign() 判断数字的符号(正， 负， 0)
 
-        对象字面量： 对象的属性直接写变量， 属性名就是变量名， 属性值就是变量值
+        // 对象字面量： 对象的属性直接写变量， 属性名就是变量名， 属性值就是变量值
 
         const obj = {
             * myGenerator() {
@@ -193,11 +193,11 @@
             }
         }
         const obj = {
-            myGenerator: function*() {
-                yield 'hello world';
+                myGenerator: function*() {
+                    yield 'hello world';
+                }
             }
-        }
-        用表达式作为属性名， 但是一定要将表达式放在方括号内
+            // 用表达式作为属性名， 但是一定要将表达式放在方括号内
         const obj = {
             ['he' + 'llo']() {
                 return 'Hi'
@@ -205,7 +205,7 @@
         }
         obj.hello();
 
-        对象的拓展运算符(...) 用于取出参数对象所有可遍历属性然后拷贝到当前对象
+        // 对象的拓展运算符(...) 用于取出参数对象所有可遍历属性然后拷贝到当前对象
         let person = {
             name: 'Amy',
             age: 15
@@ -213,7 +213,7 @@
         let someone = {...person
         };
         someone // {name:'Amy', age:15} 
-        合并两个对象
+        // 合并两个对象
         let age = {
             age: 15
         };
@@ -221,9 +221,9 @@
             name: 'Amy'
         };
         let person = {...age,
-            ...name
-        }
-        自定义的属性在拓展运算符后面， 则拓展运算符对象内部同名的属性将被覆盖掉
+                ...name
+            }
+            // 自定义的属性在拓展运算符后面， 则拓展运算符对象内部同名的属性将被覆盖掉
         let person = {
             name: "Amy",
             age: 15
@@ -233,10 +233,10 @@
             age: 17
         }
         someone; //{name:'Mike',age:17}
-        拓展运算符后面是空对象时... {}...null...undefined 不会任何效果
+        // 拓展运算符后面是空对象时... {}...null...undefined 不会任何效果
 
         对象的新方法
-        Object.assign(tagert, source_1, ...) 将源对象的所有可枚举属性复制到目标对象中
+        // Object.assign(tagert, source_1, ...) 将源对象的所有可枚举属性复制到目标对象中
         let tagert = {
             a: 1
         };
@@ -249,7 +249,7 @@
         Object.assign(tagert, object2, object3); // {a:1, b:2 ,c:3}
         typeof Object.assign(3);
         'object'
-        null undefined 在第一个时 会报错
+        // null undefined 在第一个时 会报错
         assign的属性拷贝是浅拷贝
         let sourceObj = {
             a: {
@@ -263,9 +263,9 @@
         tagertObj.a.b = 2;
         sourceObj.a.b; //2
         同名属性替换
-        数组的处理：
+        // 数组的处理：
         Object.assign([2, 3], [5]); // [5,3]  会将数组处理成对象
-        Object.is(value1, value2) 用来比较两个值是否严格相等， 与（ === ）基本类似
+        // Object.is(value1, value2) 用来比较两个值是否严格相等， 与（ === ）基本类似
     </script>
 </body>
 
