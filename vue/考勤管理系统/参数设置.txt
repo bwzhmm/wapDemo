@@ -1,0 +1,127 @@
+参数
+
+1.获取
+127.0.0.1:8080/check/rest/Setting/get
+{
+    "item": {
+        "YEAR": [
+            {
+                "DES": "旅游1",
+                "ID": "acaf6242b9014475bbb073345e5d9666",
+                "DAY": [
+                    "20200701"
+                ]
+            },
+            {
+                "DES": "年假",
+                "ID": "c34d05edf49648b3a49ea6ebda160a86",
+                "DAY": [
+                    "20200201",
+                    "20200131",
+                    "20200123"
+                ]
+            }
+        ],
+        "CFG": {
+            "STARTTIME": "0830",
+            "YEARCLEANDAY": "1231",
+            "ID": "1713a4a242394bd9a9f90948320c1f0a",
+            "STARTTIME_LATEST": "0835"
+        },
+        "UNUSE": [
+            {
+                "ORGID": null,
+                "ISCHECK": "0",
+                "YEARTIME": 0,
+                "SEX": null,
+                "PHONE_SELF": null,
+                "PHONE_OFFICE": null,
+                "ORGNAME": null,
+                "NAME": "马光玮",
+                "ENTRYDAY": null,
+                "STATUS": "1",
+                "RESTTIME": 0,
+                "ID": "102",
+                "QUITDAY": null,
+                "LOGINNAME": null,
+                "BIRTHDAY": null
+            },
+            {
+                "ORGID": "org1",
+                "ISCHECK": "0",
+                "YEARTIME": 0,
+                "SEX": "1",
+                "PHONE_SELF": "312",
+                "PHONE_OFFICE": "123",
+                "ORGNAME": "开发",
+                "NAME": "周文学",
+                "ENTRYDAY": "20200506",
+                "STATUS": "1",
+                "RESTTIME": 0,
+                "ID": "100",
+                "QUITDAY": null,
+                "LOGINNAME": "ZHOUXUEWEN",
+                "BIRTHDAY": "19920202"
+            }
+        ],
+        "SPECIALDAY": [
+            {
+                "DATE": "20200501",
+                "STATE": "0",
+                "ID": "9c1ee6dce9ec4d27aec70c30b5cd0bd2"
+            },
+            {
+                "DATE": "20200502",
+                "STATE": "1",
+                "ID": "e07859e6cff44c63ad50a76603740035"
+            }
+        ]
+    },
+    "success": true,
+    "message": "成功"
+}
+
+2.保存
+127.0.0.1:8080/check/rest/Setting/save?data=
+{
+    "CFG":{
+        "YEARCLEANDAY":"年假清零日期",                    ----1231
+        "STARTTIME":"上班时间",                           ----083000
+        "STARTTIME_LATEST":"最迟打卡时间"                 ----083500
+    },
+    "YEAR":[
+        {
+            "DES":"年假",
+            "DAY":[
+                "20200123",
+                "20200131",
+                "20200201"
+            ]
+        },
+        {
+            "DES":"旅游",
+            "DAY":[
+                "20200701"
+            ]
+        }
+    ],
+    "SPECIALDAY":[
+        {
+            "DATE":"20200501",
+            "STATE":"0不需要打卡1需要打卡"
+        },
+        {
+            "DATE":"20200502",
+            "STATE":"0不需要打卡1需要打卡"
+        }
+    ],
+    "UNUSE":[
+        "用户ID",
+        "用户ID"
+    ]
+}
+
+{
+    "success": true,
+    "message": "成功"
+}

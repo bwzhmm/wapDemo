@@ -1,0 +1,333 @@
+权限
+
+1.部门列表
+127.0.0.1:80/check/rest/Auth/orgList
+{
+    "success": true,
+    "message": "成功",
+    "items": [
+        {
+            "MANAGERID": "33",
+            "LEADERID": "33",
+            "ID": "org1",
+            "LEADERNAME": "江越",
+            "MANAGERNAME": "江越",
+            "NAME": "开发"
+        },
+        {
+            "MANAGERID": "33",
+            "LEADERID": "33",
+            "ID": "org2",
+            "LEADERNAME": "江越",
+            "MANAGERNAME": "江越",
+            "NAME": "财务"
+        },
+        {
+            "MANAGERID": "33",
+            "LEADERID": "33",
+            "ID": "org3",
+            "LEADERNAME": "江越",
+            "MANAGERNAME": "江越",
+            "NAME": "销售"
+        },
+        {
+            "MANAGERID": "33",
+            "LEADERID": "33",
+            "ID": "org4",
+            "LEADERNAME": "江越",
+            "MANAGERNAME": "江越",
+            "NAME": "商务"
+        }
+    ]
+}
+
+2.保存部门经理和上级领导
+127.0.0.1:80/check/rest/Auth/saveOrgManager?data=[{"MANAGERID": 33,"LEADERID": 33,"ID": "org1"},{"MANAGERID": 33,"LEADERID": 33,"ID": "org2"},{"MANAGERID": 33,"LEADERID": 33,"ID": "org3"},{"MANAGERID": 33,"LEADERID": 33,"ID": "org4"}]
+
+{
+    "success": true,
+    "message": "成功"
+}
+
+-------------------------------------------------------------------------------------------------------------
+以下接口不是我写的 是原来公司平台的东西 出入参可能有些不一样
+
+3.新增角色
+127.0.0.1:80/authweb/rest/Role/save?data={"NAME":"名称","DES":"描述","ISUSE":"1"}
+{
+    "success": true,
+    "message": "成功"
+}
+
+
+4.角色列表
+127.0.0.1:80/authweb/rest/Role/getRoleUserTree?filter={"checked":"true"}
+[
+    {
+        "ISDELETE": "0",
+        "GROUPID": "1",
+        "CODE": "3",
+        "expanded": true,
+        "children": [],
+        "ISUSE": "1",
+        "ID": "role3",
+        "text": "部门经理",
+        "leaf": false,
+        "NAME": "部门经理"
+    },
+    {
+        "ISDELETE": "0",
+        "GROUPID": "1",
+        "CODE": "1",
+        "expanded": true,
+        "children": [
+            {
+                "checked": false,
+                "PID": "role1",
+                "text": "超级管理员",
+                "ID": "1",
+                "leaf": true
+            }
+        ],
+        "ISUSE": "1",
+        "ID": "role1",
+        "text": "超级管理员",
+        "leaf": false,
+        "NAME": "超级管理员"
+    },
+    {
+        "ISDELETE": "0",
+        "GROUPID": "1",
+        "CODE": "2",
+        "expanded": true,
+        "children": [],
+        "ISUSE": "1",
+        "ID": "role2",
+        "text": "普通员工",
+        "leaf": false,
+        "NAME": "普通员工"
+    },
+    {
+        "ISDELETE": "0",
+        "GROUPID": "1",
+        "CODE": "4",
+        "expanded": true,
+        "children": [],
+        "ISUSE": "1",
+        "ID": "role4",
+        "text": "人事",
+        "leaf": false,
+        "NAME": "人事"
+    }
+]
+
+
+5.角色权限
+127.0.0.1:80/authweb/rest/Role/getRole?filter={"ROLEID":"role1"}
+{
+    "data": [
+        {
+            "checked": true,  ----勾中
+            "items": [
+                {
+                    "checked": true,   ----勾中
+                    "PID": "res1",
+                    "ROLEID": "role1",
+                    "RESID": "res1-1",
+                    "NAME": "个人中心"
+                }
+            ],
+            "RESID": "res1",
+            "NAME": "个人中心"
+        },
+        {
+            "checked": false,
+            "items": [
+                {
+                    "checked": false,
+                    "PID": "res2",
+                    "RESID": "res2-1",
+                    "NAME": "异常申请"
+                },
+                {
+                    "checked": false,
+                    "PID": "res2",
+                    "RESID": "res2-2",
+                    "NAME": "加班申请"
+                },
+                {
+                    "checked": false,
+                    "PID": "res2",
+                    "RESID": "res2-3",
+                    "NAME": "请假调休"
+                },
+                {
+                    "checked": false,
+                    "PID": "res2",
+                    "RESID": "res2-4",
+                    "NAME": "绩效考核"
+                }
+            ],
+            "RESID": "res2",
+            "NAME": "审批考核"
+        },
+        {
+            "checked": false,
+            "items": [
+                {
+                    "checked": false,
+                    "PID": "res3",
+                    "RESID": "res3-1",
+                    "NAME": "员工管理"
+                },
+                {
+                    "checked": false,
+                    "PID": "res3",
+                    "RESID": "res3-2",
+                    "NAME": "员工关怀"
+                },
+                {
+                    "checked": false,
+                    "PID": "res3",
+                    "RESID": "res3-3",
+                    "NAME": "离职管理"
+                }
+            ],
+            "RESID": "res3",
+            "NAME": "员工管理"
+        },
+        {
+            "checked": false,
+            "items": [
+                {
+                    "checked": false,
+                    "PID": "res4",
+                    "RESID": "res4-1",
+                    "NAME": "月度报表"
+                },
+                {
+                    "checked": false,
+                    "PID": "res4",
+                    "RESID": "res4-2",
+                    "NAME": "年度绩效"
+                }
+            ],
+            "RESID": "res4",
+            "NAME": "统计报表"
+        },
+        {
+            "checked": false,
+            "items": [
+                {
+                    "checked": false,
+                    "PID": "res5",
+                    "RESID": "res5-1",
+                    "NAME": "重置密码"
+                },
+                {
+                    "checked": false,
+                    "PID": "res5",
+                    "RESID": "res5-2",
+                    "NAME": "账号管理"
+                },
+                {
+                    "checked": false,
+                    "PID": "res5",
+                    "RESID": "res5-3",
+                    "NAME": "系统设置"
+                },
+                {
+                    "checked": false,
+                    "PID": "res5",
+                    "RESID": "res5-4",
+                    "NAME": "权限管理"
+                }
+            ],
+            "RESID": "res5",
+            "NAME": "设置"
+        }
+    ],
+    "success": true
+}
+
+6.保存角色权限
+127.0.0.1:80/authweb/rest/Role/saveAuth?data={"ROLEID":"role1","RESID":["res5","res5-1","res5-2","res5-3","res5-4","res5-5"]}
+这里是保存勾中的资源
+
+{
+    "success": true,
+    "message": "成功"
+}
+
+
+
+================================================================================================================================================
+下面2个接口原来的平台没有 我尽力仿照原来平台的格式写了 凑活着用吧
+
+7.角色用户
+127.0.0.1:80/authweb/rest/Role/getUser?filter={"ROLEID":"role1"}
+
+{
+    "data": [
+        {
+            "checked": false,
+            "ID": "org1",
+            "users": [
+                {
+                    "checked": true,
+                    "ID": "1",
+                    "NAME": "超级管理员"
+                },
+                {
+                    "checked": false,
+                    "ID": "100",
+                    "NAME": "周文学"
+                },
+                {
+                    "checked": false,
+                    "ID": "102",
+                    "NAME": "马光玮"
+                }
+            ],
+            "NAME": "开发"
+        },
+        {
+            "checked": true,
+            "ID": "org2",
+            "users": [],
+            "NAME": "财务"
+        },
+        {
+            "checked": true,
+            "ID": "org3",
+            "users": [],
+            "NAME": "销售"
+        },
+        {
+            "checked": true,
+            "ID": "org4",
+            "users": [],
+            "NAME": "商务"
+        }
+    ],
+    "success": true
+}
+
+8.保存角色用户 
+这里保存和上面的保存资源不一样 USERID 数组只传勾中的用户ID  部门的ORGID别传
+
+127.0.0.1:80/authweb/rest/Role/saveUser?data={"ROLEID":"role2","USERID":["100","103"]}
+
+{
+    "success": true,
+    "message": "成功"
+}
+
+9.删除角色
+127.0.0.1:80/authweb/rest/Role/deleteRole?ROLEID=07e68a88270f4e3ea4b6278e18d05369
+这里我做的真删除 删除的时候最好确认下
+
+{
+    "success": true,
+    "message": "成功"
+}

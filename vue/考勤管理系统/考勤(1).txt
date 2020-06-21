@@ -1,0 +1,212 @@
+考勤
+
+1.列表
+127.0.0.1:80/check/rest/Record/list?page=1&limit=10&data={"DAY":"20200520","NAME":"江","STARTTIME":"20200519","ENDTIME":"20200520"}
+"NAME":"用户名模糊查询",
+"STARTTIME":"开始时间",
+"ENDTIME":"结束时间",
+"DAY":"日期"
+
+{
+    "total": 1,
+    "success": true,
+    "message": "成功",
+    "items": [
+        {
+            "CHECKRESULT_NEW": "1",
+            "EXCCREATETIME": null,
+            "CHECKRESULT_OLD": "1",
+            "NAME": "江越",
+            "EXPLAIN": null,
+            "DELAYSTATE": "0",
+            "USERID": "33",
+            "ISWORKDAY": "1",
+            "ID": "923c2b0a740c417585a37989b89b9c7a",
+            "APPLYSTATE": null,
+            "OVERTIME": null,
+            "DAY": "20200520",
+            "CHECKTIME": "080554"
+        }
+    ]
+}
+
+2.根据id查询
+127.0.0.1:80/check/rest/Record/selectByid?id=f5f99a0b2b9f427fb8ece3c02fdacd15
+
+{
+    "item": {
+        "CHECKRESULT_NEW": "1",    -----1正常2迟到3旷工  
+        "EXPLAIN": null,
+        "DELAYSTATE": "0",
+        "USERID": "33",
+        "EXCCREATETIME": null,
+        "CHECKRESULT_OLD": "1",
+        "ISWORKDAY": "1",
+        "ID": "f5f99a0b2b9f427fb8ece3c02fdacd15",
+        "APPLYSTATE": "0",
+        "OVERTIME": 0,
+        "DAY": "20200520",
+        "CHECKTIME": "080554"
+    },
+    "success": true,
+    "message": "成功"
+}
+
+3.异常申请
+127.0.0.1:80/check/rest/Record/excApply?data={"ID":"d07df6c5bd524d12ae41942bb47a8927","EXPLANATION":"explain","CHECKRESULT_NEW":"1"}
+CHECKRESULT_NEW  1正常2迟到3旷工 
+{
+    "success": true,
+    "message": "成功"
+}
+
+4.异常列表
+127.0.0.1:80/check/rest/Record/excList?page=1&limit=10&data={"NAME":"杨"}
+{
+    "total": 1,
+    "success": true,
+    "message": "成功",
+    "items": [
+        {
+            "CHECKRESULT_NEW": "1",
+            "EXCCREATETIME": "20200616100509",
+            "CHECKRESULT_OLD": "3",
+            "NAME": "杨鹏",
+            "EXPLANATION": "explain",
+            "DELAYSTATE": "4",
+            "USERID": "17",
+            "ISWORKDAY": "1",
+            "ID": "d07df6c5bd524d12ae41942bb47a8927",
+            "APPLYSTATE": "1",
+            "OVERTIME": 0,
+            "DAY": "20200520",
+            "CHECKTIME": "130542"
+        }
+    ]
+}
+
+5.异常审批
+127.0.0.1:80/check/rest/Record/excHandle?data={"ID":"d07df6c5bd524d12ae41942bb47a8927","APPLYSTATE":"2","DELAYSTATE":"0"}
+这个审批的参数有点复杂 写到了再说
+{
+    "success": true,
+    "message": "成功"
+}
+
+6.月度统计列表
+127.0.0.1:80/check/rest/Record/monthStatistic?page=1&limit=10&data={"MONTH":"202005","ORGID":"org1"}
+
+{
+    "total": 55,
+    "success": true,
+    "message": "成功",
+    "items": [
+        {
+            "L15": 0,
+            "ACTUALDAY": 4,
+            "SCORE": null,
+            "CHECKDAY": 4,
+            "L60": 0,
+            "USERID": "103",
+            "L30": 0,
+            "ORGNAME": "开发",
+            "ABSENT": 0,
+            "RESTARR": [
+                {
+                    "HOURS": null,
+                    "DAYTYPE": "2",
+                    "USERID": "103",
+                    "STARTDAY": "20200518",
+                    "ENDDAY": "20200528",
+                    "DAY": null,
+                    "TYPE": "8"
+                }
+            ],
+            "NAME": "姜望",
+            "RESTHOURS": 88
+        },
+        {
+            "L15": 0,
+            "ACTUALDAY": 0,
+            "SCORE": null,
+            "CHECKDAY": 4,
+            "L60": 0,
+            "USERID": "104",
+            "L30": 0,
+            "ORGNAME": "开发",
+            "ABSENT": 4,
+            "RESTARR": [],
+            "NAME": "衡露露",
+            "RESTHOURS": 0
+        },
+        {
+            "L15": 0,
+            "ACTUALDAY": 0,
+            "SCORE": null,
+            "CHECKDAY": 4,
+            "L60": 0,
+            "USERID": "105",
+            "L30": 0,
+            "ORGNAME": "开发",
+            "ABSENT": 4,
+            "RESTARR": [],
+            "NAME": "李凯",
+            "RESTHOURS": 0
+        },
+        {
+            "L15": 0,
+            "ACTUALDAY": 2,
+            "SCORE": null,
+            "CHECKDAY": 4,
+            "L60": 0,
+            "USERID": "106",
+            "L30": 0,
+            "ORGNAME": "开发",
+            "ABSENT": 2,
+            "RESTARR": [],
+            "NAME": "刘世云",
+            "RESTHOURS": 0
+        },
+        {
+            "L15": 0,
+            "ACTUALDAY": 4,
+            "SCORE": null,
+            "CHECKDAY": 4,
+            "L60": 3,
+            "USERID": "114",
+            "L30": 1,
+            "ORGNAME": "开发",
+            "ABSENT": 0,
+            "RESTARR": [],
+            "NAME": "李凯",
+            "RESTHOURS": 0
+        }
+    ]
+}
+
+7.首页左上角 今日考勤状态
+127.0.0.1:80/check/rest/Record/todayInfo
+{
+    "item": {
+        "ISWORKDAY": "1",  1是工作日 2非工作日   所有人的这个都一样 就是告诉今天是不是正常的考勤日
+        "DAY": "20200617"
+    },
+    "success": true,
+    "message": "成功"
+}
+
+8.首页上方个人考勤信息  小时
+127.0.0.1:80/check/rest/Record/personalInfo?data={"MONTH":"202005"}
+{
+    "item": {
+        "ACTUALDAY": 4,
+        "SCORE": null,   绩效是null你就显示 - 
+        "OVERTIMEHOURS": 0,
+        "RESTTIME": "-4",
+        "YEARTIME": "0",
+        "WORKDAYS": 22,
+        "RESTHOURS": 4
+    },
+    "success": true,
+    "message": "成功"
+}

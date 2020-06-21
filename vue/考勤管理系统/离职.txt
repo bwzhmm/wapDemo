@@ -1,0 +1,39 @@
+离职  3-3
+
+1.列表
+127.0.0.1:8080/check/rest/Resignation/list?page=1&limit=10&data={"STATUS":"2","NAME":"","ORGID":"org1"}
+STATUS = 2 表示离职员工  NAME模糊查询 ORGID是选择的部门ID
+
+{
+    "total": 1,
+    "success": true,
+    "message": "成功",
+    "items": [
+        {
+            "ORGID": "org1",
+            "ISCHECK": null,
+            "YEARTIME": null,
+            "SEX": null,
+            "PHONE_SELF": null,
+            "PHONE_OFFICE": null,
+            "ORGNAME": "开发",
+            "NAME": "2123",
+            "ENTRYDAY": null,
+            "STATUS": "2",
+            "RESTTIME": null,
+            "ID": "123",
+            "REASON": "协议解除",
+            "QUITDAY": "20200608",
+            "LOGINNAME": null,
+            "BIRTHDAY": "19930504"
+        }
+    ]
+}
+
+2.新增 办理离职，原因直接拼成字符串即可
+127.0.0.1:8080/check/rest/Resignation/insert?data={"USERID": "123","DAY": "20200608","REASON":"协议解除"}
+REASON 把你勾的用/拼接起来就行了 例如 严重违法乱纪/个人原因/协议解除
+{
+    "success": true,
+    "message": "成功"
+}

@@ -1,0 +1,97 @@
+人员  3.1 3.2
+1.列表
+127.0.0.1:8080/check/rest/User/list?page=1&limit=10&data={"STATUS":"1在职2离职","NAME":"","ORGID":"","BIRTHMONTH":"05"}
+BIRTHMONTH是关怀员工页面的月份
+司龄用当前时间减入职年份算一下
+
+{
+    "total": 1,
+    "success": true,
+    "message": "成功",
+    "items": [
+        {
+            "ORGID": "org1",
+            "ISCHECK": null,
+            "YEARTIME": null,
+            "SEX": null,
+            "PHONE_SELF": null,
+            "PHONE_OFFICE": null,
+            "ORGNAME": "开发",
+            "NAME": "2123",
+            "ENTRYDAY": null,
+            "STATUS": "2",
+            "RESTTIME": null,
+            "ID": "123",
+            "QUITDAY": "20200608",
+            "LOGINNAME": null,
+            "BIRTHDAY": "19930504"
+        }
+    ]
+}
+
+2.详情 编辑的
+127.0.0.1:8080/check/rest/User/selectByid?id=100
+{
+    "item": {
+        "ORGID": "org1",
+        "ISCHECK": "1",
+        "YEARTIME": 0,
+        "SEX": "1",
+        "PHONE_SELF": "312",
+        "PHONE_OFFICE": "123",
+        "ORGNAME": "开发",
+        "NAME": "周文学",
+        "ENTRYDAY": "20200506",
+        "STATUS": "1",
+        "RESTTIME": 0,
+        "ID": "100",
+        "QUITDAY": null,
+        "LOGINNAME": "ZHOUXUEWEN",
+        "BIRTHDAY": "19920202"
+    },
+    "success": true,
+    "message": "成功"
+}
+
+3.编辑 倒数6
+127.0.0.1:8080/check/rest/User/update?data={
+    "ID":"100",
+    "ORGID":"org1", 
+    "LOGINNAME":"ZHOUXUEWEN", 
+    "SEX":"1",
+    "BIRTHDAY":"19920202",  出生日期
+    "ENTRYDAY":"20200506",  入职日期
+    "PHONE_OFFICE":"123",   办公电话
+    "PHONE_SELF":"312"      私人电话
+}
+
+{
+    "success": true,
+    "message": "成功"
+}
+
+4.修改密码 5-1
+127.0.0.1:8080/check/rest/User/changePWD?data={"ID":"100","oldPWD":"123456","newPWD":"Angke@123456","newPWD2":"Angke@123456"}
+{
+    "success": true,
+    "message": "成功"
+}
+{
+    "success": false,
+    "errInf": {
+        "shortBusInf": "原密码不对",
+        "code": "CPWD001",
+        "uniCode": "da4023ebdf9c4c83bb8aa583780c7447",
+        "type": 1,
+        "metailBusInf": "原密码不对"
+    }
+}
+
+5.重置密码 默认密码123456  管理员的
+127.0.0.1:8080/check/rest/User/resetPWD?data={"ID":"100"}
+
+{
+    "success": true,
+    "message": "成功"
+}
+

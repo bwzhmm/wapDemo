@@ -1,0 +1,57 @@
+请假
+
+1.列表
+127.0.0.1:80/check/rest/Rest/list?page=1&limit=10&data={"NAME":"","USERTYPE":"2"}
+用户USERTYPE1 管理员USERTYPE2
+
+2.新增
+127.0.0.1:80/check/rest/Rest/insert?data={"USERID":"103","DAYTYPE":"1","DAY":"20200520","TYPE":"1",,"HOURS":"4","REASON":"123456"}
+
+127.0.0.1:80/check/rest/Rest/insert?data={"USERID":"103","DAYTYPE":"2","STARTDAY":"20200518","ENDDAY":"20200528","TYPE":"8","REASON":"123456"}
+
+DAYTYPE=1 和 DAYTYPE=2  参数格式不一样 1是固定一天内的几小时 2是连续天请假
+
+"USERID":"",
+"DAYTYPE":"1单天2连续天",
+"DAY":"20200520",
+"STARTDAY":"",
+"ENDDAY":"",
+"TYPE":"1病假2调休3事假4哺乳假5年假6例假7产假8陪产假9婚假0丧假",
+"HOURS":"请假时长 1-8",
+"REASON":""
+
+{
+    "success": true,
+    "message": "成功"
+}
+
+3.根据id查询
+127.0.0.1:80/check/rest/Rest/selectByid?id=456d54d0862e472ebe97c3465e7a6705
+
+{
+    "item": {
+        "ISHANDLE": "0",
+        "ENDDAY": null,
+        "STATE": "0",
+        "NAME": "江越",
+        "HOURS": 4,
+        "DAYTYPE": "1",
+        "USERID": "33",
+        "STARTDAY": null,
+        "ID": "456d54d0862e472ebe97c3465e7a6705",
+        "REASON": "123",
+        "CREATETIME": "20200616141111",
+        "DAY": "20200520",
+        "TYPE": "1"
+    },
+    "success": true,
+    "message": "成功"
+}
+
+4.处理
+127.0.0.1:80/check/rest/Rest/handle?data={"ID":"3bc50843f7d542cebc39e54583b2fb23","STATE":"1"}
+STATE 1同意2拒绝
+{
+    "success": true,
+    "message": "成功"
+}
