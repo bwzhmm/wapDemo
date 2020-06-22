@@ -43,6 +43,13 @@ export function getRestById(data) {
   })
 };
 
+export function getRestHoliday(data) {
+  return service.postAjax({
+    url:'/check/rest/User/getRestHoliday',
+    data,
+  })
+};
+
 export function InsertRestList(data) {
   return service.postAjax({
     url:'/check/rest/Rest/insert',

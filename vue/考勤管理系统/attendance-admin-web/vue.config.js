@@ -51,13 +51,16 @@ module.exports = {
     open: true,
     host: '0.0.0.0',
     port: 8809,
-    // 由于本项目数据通过easy-mock和mockjs模拟，不存在跨域问题，无需配置代理;
+    // 由于本项目数据通过easy-mock和mockjs模拟，不存在跨域问题，无需配置代理; '/check/rest' '/authweb/rest'
     proxy: { 
-      '/check/rest': {
+      '/': {
           target: 'https://jy.dev.angke.cn',
-          secure: false,  // 如果是https接口，需要配置这个参数
+          //  target: 'http://172.20.1.236:80',
+          secure: true,  // 如果是https接口，需要配置这个参数
+          // secure: false,
           changeOrigin: true
-      }
+      },
+
     }
   },
    // webpack相关配置

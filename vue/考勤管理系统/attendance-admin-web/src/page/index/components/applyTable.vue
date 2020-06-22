@@ -144,8 +144,8 @@
         <i class="el-icon-warning"></i>
         <span>
           您拥有加班时长
-          <i class="blueColor">7</i>小时、年假
-          <i class="blueColor">2.5</i>天，可用于请假调休
+          <i class="blueColor">{{holidayInfo.RESTTIME}}</i>小时、年假
+          <i class="blueColor">{{holidayInfo.YEARTIME}}</i>天，可用于请假调休
         </span>
       </div>
       <el-form :model="leaveform" ref="leaveform">
@@ -256,7 +256,8 @@ import {
   fetchOvertimeList,
   addOvertime,
   fetchRestList,
-  InsertRestList
+  InsertRestList,
+  // getRestHoliday
 } from "@/api/approval";
 import util from "@/utils/util";
 import { stringDay } from "@/utils/common";
@@ -298,7 +299,11 @@ export default {
         REASON: "",
         HOURS: ""
       },
-      formLabelWidth: "100px"
+      formLabelWidth: "100px",
+      holidayInfo:{
+        RESTTIME:"",
+        YEARTIME:""
+      }
     };
   },
   mounted() {
@@ -429,8 +434,18 @@ export default {
       this.overtimeVisible = true;
     },
     handleClickLeave(row) {
-      this.leaveVisible = true;
-      console.log(row);
+         let param = {
+          data: JSON.stringify({
+            USERID: "", //管理员传  普通用户为空
+          })
+        };
+          //  getRestHoliday(param).then(res => {
+          //   if (res.success) {
+          //     this.holidayInfo  = res.item;
+          // this.leaveVisible = true;
+           
+          //   }
+          // });
     },
     handleCurrentChange(currentPage) {
       this.currentPage = currentPage;

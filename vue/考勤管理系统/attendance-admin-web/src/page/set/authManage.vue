@@ -69,11 +69,6 @@
               </el-form-item>
             </el-col>
           </div>
-          <!-- <el-col :span="8">
-            <el-form-item label="部门：" prop="outPerson" :label-width="formLabelWidth">
-              <el-input v-model="attendanceForm.outPerson"></el-input>
-            </el-form-item>
-          </el-col>-->
         </el-row>
         <el-form-item>
           <el-button type="primary" @click="submitForm('depForm')">提交</el-button>
@@ -88,58 +83,40 @@
         <el-button @click="addRole(true)" type="primary" icon="el-icon-plus">角色</el-button>
       </div>
       <el-table :data="rolesList" class="mg_tab">
-        <el-table-column prop="roles" label="角色组" width="180"></el-table-column>
-        <el-table-column prop="users" label="用户列表"></el-table-column>
+        <el-table-column prop="NAME" label="角色组" width="180"></el-table-column>
+        <el-table-column prop="children" label="用户列表">
+          <template slot-scope="scope">{{ getUserScope(scope.row)}}</template>
+        </el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
-            <span class="opacity_65" v-if="scope.row.roleType==0">所有权限</span>
-            <el-button
-              @click="handleAuthClick(scope.row)"
-              type="text"
-              size="small"
-              v-if="scope.row.roleType>0"
-            >权限维护</el-button>
-            <el-button
-              @click="handleClick(scope.row)"
-              type="text"
-              size="small"
-              v-if="scope.row.roleType==2"
-            >成员维护</el-button>
-            <el-button
-              @click="handleClick(scope.row)"
-              type="text"
-              size="small"
-              v-if="scope.row.roleType==2"
-            >删除角色</el-button>
+            <span class="opacity_65" v-if="scope.row.NAME=='超级管理员'">所有权限</span>
+            <!-- v-if="scope.row.CODE>3" v-if="scope.row.CODE>1" -->
+            <el-button @click="handleAuthClick(scope.row)" type="text" size="small">权限维护</el-button>
+            <el-button @click="handleMemberClick(scope.row)" type="text" size="small">成员维护</el-button>
+            <el-button @click="handleDeleteRole(scope.row)" type="text" size="small">删除角色</el-button>
           </template>
         </el-table-column>
       </el-table>
     </div>
-    <el-dialog title="权限维护" :visible.sync="annualVisible" width="600px">
-      <div class="title">
-        <span class="opacity_65">普通员工</span>
-      </div>
-      <ul id="demo" v-for="(child, index) in treeData" :key="index">
-        <tree-item class="item" :treelist="child" @make-folder="makeFolder" @add-item="addItem"></tree-item>
-      </ul>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible=false">取消</el-button>
-        <el-button type="primary" @click="dialogVisible=false">提交</el-button>
-      </span>
-    </el-dialog>
+
     <el-dialog title="添加角色" :visible.sync="addRoleVisible" width="500px">
       <el-form :model="roleForm" ref="roleForm">
         <el-row>
           <el-col :span="20">
             <el-form-item label="角色组:" label-width="100px">
-              <el-input v-model="roleForm.roles" placeholder="请输入角色组名称"></el-input>
+              <el-input v-model="roleForm.NAME" placeholder="请输入角色组名称"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span="20">
-            <el-form-item label="用户列表:" label-width="100px">
-              <el-input v-model="roleForm.users" placeholder="请选择用户"></el-input>
+            <el-form-item label="描述:" label-width="100px">
+              <el-input
+                type="textarea"
+                :autosize="{ minRows:3, maxRows:6}"
+                v-model="roleForm.DES"
+                placeholder="请输入描述内容，不超过200字"
+              ></el-input>
             </el-form-item>
           </el-col>
         </el-row>
@@ -150,17 +127,40 @@
         <el-button type="primary" @click="submitRole">提交</el-button>
       </span>
     </el-dialog>
+    <tree-auth
+      v-if="annualVisible"
+      :treeData="treeData"
+      class="item"
+      :dialogVisible.sync="annualVisible"
+    ></tree-auth>
+    <tree-member
+      v-if="memberVisible"
+      class="item"
+      :treeData="memberTreeData"
+      :dialogVisible.sync="memberVisible"
+    ></tree-member>
   </div>
 </template>
 
 <script>
-import TreeItem from "../../components/tree-list/tree-item.vue";
-import { fetchOrgList, saveOrgManager, addRole } from "@/api/auth";
+import TreeAuth from "./tree-list/tree-auth.vue";
+import TreeMember from "./tree-list/tree-member.vue";
+
+import {
+  fetchOrgList,
+  saveOrgManager,
+  addRole,
+  getRoleUserTree,
+  getRole,
+  getUserRole,
+  deleteRole
+} from "@/api/auth";
 import { fetchUserList } from "@/api/user";
 
 export default {
   components: {
-    TreeItem
+    TreeAuth,
+    TreeMember
   },
   data() {
     return {
@@ -202,6 +202,7 @@ export default {
           }
         ]
       },
+      memberTreeData: [],
       treeData: [
         {
           id: 1,
@@ -251,6 +252,7 @@ export default {
         }
       ],
       annualVisible: false,
+      memberVisible: false,
       addRoleVisible: false,
       attendanceForm: {
         outPerson: "",
@@ -258,65 +260,91 @@ export default {
       },
       formLabelWidth: "120px",
       roleForm: {
-        roles: "角色",
-        users: "张三"
+        NAME: "",
+        DES: ""
       },
-      rolesList: [
-        {
-          roles: "超级管理员",
-          users: "王小虎",
-          roleType: 0
-        },
-        {
-          roles: "普通员工",
-          users: "默认所有员工",
-          roleType: 1
-        },
-        {
-          roles: "部门经理",
-          users: "张三",
-          roleType: 2
-        }
-      ]
+      rolesList: []
     };
   },
   mounted() {
     // console.log("tempArry");
-    fetchOrgList().then(res => {
-      this.depOptions = res.item;
-    });
-    let tempArry = JSON.parse(JSON.stringify(this.depForm.depOptions));
-    tempArry.forEach(item => {
-      item.selectManagers = [
-        {
-          value: item.MANAGERID,
-          label: item.MANAGERNAME
-        }
-      ];
-      item.selectLeaders = [
-        {
-          value: item.LEADERID,
-          label: item.LEADERNAME
-        }
-      ];
-    });
-    console.log("tempArry", tempArry);
-    this.depForm.depOptions = tempArry;
+
+    this.getOrgList();
+    this.getRoleGroupList();
   },
   methods: {
+    // 获取部门列表
+    getOrgList() {
+      fetchOrgList().then(res => {
+        this.depOptions = res.item;
+      });
+      let tempArry = JSON.parse(JSON.stringify(this.depForm.depOptions));
+      tempArry.forEach(item => {
+        item.selectManagers = [
+          {
+            value: item.MANAGERID,
+            label: item.MANAGERNAME
+          }
+        ];
+        item.selectLeaders = [
+          {
+            value: item.LEADERID,
+            label: item.LEADERNAME
+          }
+        ];
+      });
+      // console.log("tempArry", tempArry);
+      this.depForm.depOptions = tempArry;
+    },
+
+    // 获取角色组列表
+    getRoleGroupList() {
+      let param = {
+        filter: JSON.stringify({
+          checked: "true"
+        })
+      };
+      getRoleUserTree(param).then(res => {
+        this.rolesList = res;
+      });
+    },
+
+    // 角色组下的用户列表
+    getUserScope(row) {
+      let text = row.children.length
+        ? row.children.map(item => item.text).join(",")
+        : "-";
+      if (row.text == "普通员工") {
+        text = "默认所有员工";
+      }
+      return text;
+    },
+
     querySearchAsync(queryString, index, type) {
       console.log("index", index);
       console.log("queryString", queryString);
       console.log("type", type);
       if (type) {
         this.depForm.depOptions[index].selectManagers = [
-          { value: "33", label: "江越2" },
-          { value: "31", label: "江越4" }
+          {
+            value: "33",
+            label: "江越2"
+          },
+          {
+            value: "31",
+            label: "江越4"
+          }
         ];
       } else {
         this.depForm.depOptions[index].selectLeaders = [
-          { value: "43", label: "江越5" },
-          { value: "40", label: "江越7" }
+          {
+            value: "43",
+            label: "江越5"
+          },
+          {
+            value: "40",
+            label: "江越7"
+          }
         ];
       }
 
@@ -335,7 +363,10 @@ export default {
 
         fetchUserList(param).then(res => {
           let tempData = res.items.map(item => {
-            return { label: item.NAME, value: item.ID };
+            return {
+              label: item.NAME,
+              value: item.ID
+            };
           });
           this.selectUsers = tempData;
         });
@@ -385,8 +416,85 @@ export default {
     resetForm(formName) {
       this.$refs[formName].resetFields();
     },
+
+    handleDeleteRole(row) {
+      this.$confirm("确认删除该角色组吗？", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+        // center: true,
+        // showCancelButton: false
+      }).then(() => {
+        let param = {
+          ROLEID: row.ID
+        };
+        deleteRole(param).then(res => {
+          if (res.success) {
+            this.$message({
+              message: "删除成功！",
+              type: "success"
+            });
+          } else {
+            this.$message({
+              message: "删除失败，请重试！",
+              type: "error"
+            });
+          }
+        });
+      });
+    },
+
+    getTreeData(data) {
+      data.forEach(item => {
+        item.value = item.RESID || item.ID;
+        item.label = item.NAME;
+        item.children = item.items || item.users;
+
+        if (item.children) {
+          let childChecked = item.children.filter(item => item.checked == true);
+          let countCheck = childChecked.length,
+            countChild = item.children.length;
+
+          console.log("childChecked", childChecked);
+          item.isCheckAll = countCheck == countChild;
+          item.isIndeterminate = countCheck > 0 && countCheck < countChild;
+          console.log("childChecked222", countCheck == countChild);
+          this.getTreeData(item.children);
+        }
+      });
+      // console.log('dd',data)
+      return data;
+    },
+
+    // 成员维护
+    handleMemberClick() {
+      let param = {
+        filter: JSON.stringify({
+          ROLEID: "role1"
+        })
+      };
+      getUserRole(param).then(res => {
+        // this.rolesList = res;
+        let tempArry = JSON.parse(JSON.stringify(res.data));
+        let treelist = this.getTreeData(tempArry);
+        console.log("treelist", treelist);
+        this.memberTreeData = treelist;
+        this.memberVisible = true;
+      });
+    },
+    // 权限维护
     handleAuthClick() {
-      this.annualVisible = true;
+      let param = {
+        filter: JSON.stringify({
+          ROLEID: "role1"
+        })
+      };
+      getRole(param).then(res => {
+        let tempArry = JSON.parse(JSON.stringify(res.data));
+        let treelist = this.getTreeData(tempArry);
+        this.treeData = treelist;
+        this.annualVisible = true;
+      });
     },
     addRole() {
       this.addRoleVisible = true;
@@ -396,11 +504,16 @@ export default {
       let param = {
         data: JSON.stringify({
           ISUSE: "1",
-          DES: "",
-          NAME: ""
+          DES: this.roleForm.DES,
+          NAME: this.roleForm.NAME
         })
       };
-      addRole(param).then(res => {});
+      addRole(param).then(res => {
+        this.$message({
+          message: "添加角色成功",
+          type: "success"
+        });
+      });
     },
     resetForm(formName) {
       this.$refs[formName].resetFields();
@@ -423,19 +536,6 @@ export default {
     margin: 0 30px 30px;
     width: 100%;
   }
-}
-.title {
-  border-left: 3px solid #38adff;
-  padding: 0 10px;
-  margin-bottom: 20px;
-}
-.picker_width140 {
-  width: 140px;
-  margin-right: 10px;
-}
-.picker_width100 {
-  width: 100px;
-  margin-right: 10px;
 }
 .mg_tab {
   width: 100%;

@@ -1,6 +1,6 @@
 import service from "@/utils/util";
 
- // 考勤记录
+// 考勤记录
 export function fetchTodayInfo(data) {
   return service.postAjax({
     url: '/check/rest/Record/todayInfo',
@@ -60,4 +60,10 @@ export function fetchMonthStatistic(data) {
   })
 };
 
+export function syncRecord(data) {
+  return service.postAjax({
+    url: '/check/rest/Record/sync',
+    data,
+  })
+};
 

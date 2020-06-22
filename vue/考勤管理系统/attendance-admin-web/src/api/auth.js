@@ -39,7 +39,7 @@ export function addRole(data) {
   })
 };
 
-// 角色列表
+// 角色组table 
 export function getRoleUserTree(data) {
   return service.postAjax({
     url: '/authweb/rest/Role/getRoleUserTree',
@@ -47,7 +47,7 @@ export function getRoleUserTree(data) {
   })
 };
 
-//角色权限
+//权限维护列表
 export function getRole(data) {
   return service.postAjax({
     url: '/authweb/rest/Role/getRole',
@@ -63,7 +63,7 @@ export function saveAuth(data) {
   })
 };
 
-//角色用户
+//成员维护列表
 export function getUserRole(data) {
   return service.postAjax({
     url: '/authweb/rest/Role/getUser',

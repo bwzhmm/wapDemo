@@ -17,7 +17,7 @@
         </el-select>
         <el-button @click="handleQuery()" type="primary" size="small">查询</el-button>
         <el-divider class="divider" direction="vertical"></el-divider>
-        <el-button @click="handleQuery()" type="primary" size="small">导出</el-button>
+        <el-button @click="handleExport()" type="primary" size="small">导出</el-button>
       </div>
     </div>
     <el-table :data="tableData" style="width: 100%">
@@ -172,6 +172,12 @@ export default {
 
     handleQuery(row) {
       this.getPerformanceList();
+    },
+
+    handleExport(row){
+      let url  = `/check/rest/Performance/export?data={"YEAR":'${this.curYear}',"ORGID":'${this.depvalue}'}`
+      console.log('url',url)
+      window.open(url,"_blank");
     },
 
     handleCurrentChange(currentPage) {
