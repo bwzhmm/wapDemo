@@ -16,25 +16,28 @@
       </div>
     </div>
     <el-table :data="tableData" style="width: 100%">
-      <el-table-column prop="DAY" label="日期" width="110" align="center">
+      <el-table-column prop="DAY" label="日期" align="center">
         <template slot-scope="scope">{{ formatDay(scope.row.DAY)}}</template>
       </el-table-column>
-      <el-table-column prop="CHECKTIME" label="打卡时间" width="100" align="center">
+      <el-table-column prop="CHECKTIME" label="最早打卡时间" align="center">
         <template slot-scope="scope">{{ formatStrTime(scope.row.CHECKTIME)||'-'}}</template>
       </el-table-column>
-      <el-table-column prop="CHECKRESULT_OLD" label="原考勤结果" width="100" align="center">
+      <el-table-column prop="LASTCHECKTIME" label="最晚打卡时间" align="center">
+        <template slot-scope="scope">{{ formatStrTime(scope.row.LASTCHECKTIME)||'-'}}</template>
+      </el-table-column>
+      <el-table-column prop="CHECKRESULT_OLD" label="原考勤结果" align="center">
         <template slot-scope="scope">{{ checkState[scope.row.CHECKRESULT_OLD] ||'-'}}</template>
       </el-table-column>
-      <el-table-column prop="CHECKRESULT_NEW" label="调整结果" width="100" align="center">
+      <el-table-column prop="CHECKRESULT_NEW" label="调整结果" align="center">
         <template slot-scope="scope">{{ checkState[scope.row.CHECKRESULT_NEW] || '-'}}</template>
       </el-table-column>
-      <el-table-column prop="EXPLANATION" label="情况说明" width="350" align="center">
+      <el-table-column prop="EXPLANATION" label="情况说明" width="250" align="center">
         <template slot-scope="scope">{{ scope.row.EXPLANATION||'-'}}</template>
       </el-table-column>
       <el-table-column prop="APPLYSTATE" label="申请状态" width="80" align="center">
         <template slot-scope="scope">{{ applyState[scope.row.APPLYSTATE]||'-'}}</template>
       </el-table-column>
-      <el-table-column prop="OVERTIME" label="加班时长（h）" width="100" align="center">
+      <el-table-column prop="OVERTIME" label="加班时长（h）" align="center">
         <template slot-scope="scope">{{ scope.row.OVERTIME||'-'}}</template>
       </el-table-column>
       <el-table-column label="操作" align="center">
@@ -50,21 +53,27 @@
             type="text"
             size="small"
             v-else
-          >{{scope.row.ISWORKDAY=='0'?"" :"已经确认" }}</el-button>
+          >{{scope.row.ISWORKDAY=='0'?"" :"已申请" }}</el-button>
         </template>
       </el-table-column>
     </el-table>
     <div class="pagination">
       <el-pagination
         background
-        layout="prev, pager, next"
         :total="total"
         :page-size="pagesize"
         :current-page="currentPage"
+        layout="sizes,prev, pager, next"
+        :page-sizes="[5,10, 20, 50, 100,200]"
+        @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       ></el-pagination>
     </div>
     <el-dialog title="异常申请" :visible.sync="dialogVisible" width="700px">
+      <div class="tips_box">
+        <i class="el-icon-warning"></i>
+        <span>因请假未能打卡，请提交请假调休申请。</span>
+      </div>
       <el-form :model="applyForm" ref="applyForm">
         <el-row>
           <el-col :span="10">
@@ -120,6 +129,8 @@
                 type="textarea"
                 :autosize="{ minRows:3, maxRows:6}"
                 v-model="applyForm.EXPLANATION"
+                maxlength="200"
+                show-word-limit
                 placeholder="请输入情况说明，不超过200字"
               ></el-input>
             </el-form-item>
@@ -204,7 +215,6 @@ export default {
     handleSubmit() {
       this.$refs["applyForm"].validate(valid => {
         if (valid) {
-          console.log("www", this.applyForm);
           let param = {
             data: JSON.stringify({
               ID: this.applyForm.ID,
@@ -212,16 +222,45 @@ export default {
               CHECKRESULT_NEW: this.applyForm.CHECKRESULT_NEW
             })
           };
-          abnormalApply(param).then(res => {
-            if (res.success) {
-              this.$message({
-                message: "异常申请成功",
-                type: "success"
-              });
-              this.getRecordList();
-              this.dialogVisible = false;
-            }
-          });
+          let state = this.checkState[this.applyForm.CHECKRESULT_NEW];
+          if (this.applyForm.CHECKRESULT_NEW !== "1") {
+            this.$confirm(
+              <span>
+                确认考勤调整结果为<i class="tips"> {state} </i>吗？
+              </span>,
+              "提示",
+              {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning",
+                center: true
+              }
+            )
+              .then(() => {
+                abnormalApply(param).then(res => {
+                  if (res.success) {
+                    this.$message({
+                      message: "异常申请成功",
+                      type: "success"
+                    });
+                    this.getRecordList();
+                    this.dialogVisible = false;
+                  }
+                });
+              })
+              .catch(() => {});
+          } else {
+            abnormalApply(param).then(res => {
+              if (res.success) {
+                this.$message({
+                  message: "异常申请成功",
+                  type: "success"
+                });
+                this.getRecordList();
+                this.dialogVisible = false;
+              }
+            });
+          }
         }
       });
     },
@@ -229,6 +268,11 @@ export default {
     handleCancel() {
       this.$refs["applyForm"].resetFields();
       this.dialogVisible = false;
+    },
+    handleSizeChange(val) {
+      this.pagesize = val;
+      this.currentPage = 1;
+      this.getRecordList();
     },
 
     handleCurrentChange(currentPage) {
@@ -249,5 +293,9 @@ export default {
 .date-picker {
   width: 292px;
   margin-right: 20px;
+}
+.tips {
+  color: #1890ff;
+  font-weight: 550;
 }
 </style>

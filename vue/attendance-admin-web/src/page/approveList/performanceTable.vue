@@ -1,8 +1,5 @@
 <template>
   <div class="wapper">
-    <!-- <el-row :gutter="20">
-          style="width:100px"
-    <el-col :span="5">-->
     <div class="left-content">
       <div class="table_head">
         <div v-if="showFlag" class="rflex">
@@ -14,14 +11,14 @@
             format="yyyy-MM"
             value-format="yyyy-MM"
             @change="handleSelectPicker"
-            style="width:150px"
+            style="width:130px"
             :clearable="false"
           ></el-date-picker>
         </div>
 
         <h4 v-else>{{ yearMonth}}绩效</h4>
         <el-button
-          :disabled="userForm.userData[0].disable"
+          :disabled="userForm.userData.length?isDisabled:true"
           @click="handleSubmit()"
           type="primary"
           size="small"
@@ -40,21 +37,21 @@
           ref="userValidateForm"
           :hide-required-asterisk="true"
         >
-          <div v-for="(user,index) in  userForm.userData" :key="user.ID+user.NAME">
-            <el-form-item
-              :label="user.NAME"
-              :prop="'userData.' + index + '.curMScore'"
-              :rules="[{ required: true, message: '考核分数不能为空', trigger: 'blur'   },
-                { pattern:/^(\d{1}|10)$/, message: '只能输入 0 ~ 10 的数字', trigger: 'blur' } ]"
-            >
-              <el-input v-model="user.curMScore" :disabled="user.disable"></el-input>
-            </el-form-item>
-          </div>
+          <template v-if="userForm.userData.length">
+            <div v-for="(user,index) in  userForm.userData" :key="user.ID+user.NAME">
+              <el-form-item
+                :label="user.NAME"
+                :prop="'userData.' + index + '.curMScore'"
+                :rules="[{ required: false, message: '考核分数不能为空', trigger: 'blur'   },
+                { pattern: /^\d+\.{0,1}\d{0,1}$/, message: '须为整数或1位小数', trigger: 'blur' } ]"
+              >
+                <el-input v-model="user.curMScore" :disabled="user.disable"></el-input>
+              </el-form-item>
+            </div>
+          </template>
         </el-form>
       </div>
     </div>
-    <!-- </el-col>
-    <el-col :span="18">-->
     <div class="right-content">
       <div class="table_head">
         <h4>绩效统计</h4>
@@ -75,6 +72,8 @@
       <el-table
         :data="tableData.slice((currentPage-1)*pagesize,currentPage*pagesize)"
         style="width: 100%"
+        @sort-change="changeSort"
+        ref="sortTable"
       >
         <el-table-column prop="NAME" label="姓名" width="110" align="center" fixed="left"></el-table-column>
         <el-table-column
@@ -84,35 +83,34 @@
           :label="records.label"
           :width="records.width"
           :fixed="records.fixed"
-          :sortable="records.sortable"
           align="center"
         >
           <template slot-scope="scope">{{getScore(scope)}}</template>
         </el-table-column>
+        <el-table-column prop="avg" label="平均分" align="center" fixed="right" sortable="custom"></el-table-column>
+        <el-table-column prop="total" label="总计" align="center" fixed="right" sortable="custom"></el-table-column>
       </el-table>
       <div class="pagination">
         <el-pagination
           background
-          layout="prev, pager, next"
           :total="total"
           :page-size="pagesize"
           :current-page="currentPage"
+          layout="sizes,prev, pager, next"
+          :page-sizes="[10, 20, 50, 100,200]"
+          @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
         ></el-pagination>
       </div>
     </div>
-
-    <!-- </el-col>
-    </el-row>-->
   </div>
 </template>
 <script>
 import { fetchPerformanceList, addPerformance } from "@/api/approval";
-import { stringDay, nowMonth, nowYearMonth } from "@/utils/common";
+import { stringDay, nowMonth, nowYearMonth, tableSort } from "@/utils/common";
 const CURMONTH = nowMonth();
 const now = new Date();
 const yearVal = now.getFullYear();
-console.log("CURMONTH", CURMONTH);
 export default {
   data() {
     return {
@@ -131,13 +129,9 @@ export default {
       currentPage: 1,
       monthColumn: "",
       userForm: {
-        userData: [
-          {
-            curMScore: "1",
-            ID: ""
-          }
-        ]
-      }
+        userData: []
+      },
+      isDisabled: false
     };
   },
   computed: {
@@ -156,20 +150,6 @@ export default {
           key: m
         });
       }
-      temp.push(
-        {
-          label: "平均分",
-          key: "average",
-          fixed: "right",
-          sortable: true
-        },
-        {
-          label: "总计",
-          key: "total",
-          fixed: "right",
-          sortable: true
-        }
-      );
       return temp;
     },
     showFlag() {
@@ -184,63 +164,101 @@ export default {
     this.getPerformanceList();
   },
   methods: {
-    //  返回每一行的月份对应的分数，计算平均分和总分
+    //  返回每一行的月份对应的分数
     getScore(scope) {
-      let d = new Date();
-      let m = d.getMonth() + 1;
       let performance = scope.row.PERFORMANCE;
       let label = scope.column.property;
-      let score = "-",
-        total = 0;
+      let score = "-";
       if (performance.length) {
         performance.map(item => {
-          total += item.SCORE;
           if (item.MONTH == label) {
             score = item.SCORE;
           }
         });
-        if (label == "total") {
-          score = total;
-        }
-        if (label == "average") {
-          score = (total / m).toFixed(1);
-        }
       }
       return score;
     },
 
+    // 监听事件
+    changeSort(column) {
+      this.currentPage = 1;
+      let sortData = JSON.parse(JSON.stringify(this.tableData));
+      this.tableData = tableSort(sortData, column);
+    },
     handleSubmit() {
       this.$refs["userValidateForm"].validate(valid => {
         if (valid) {
           let tempArr = JSON.parse(JSON.stringify(this.userForm.userData));
-          let tempData = tempArr.map(item => {
-            return { USERID: item.ID, SCORE: item.curMScore };
+          let hasScore = [],
+            noScore = [];
+          tempArr.forEach(item => {
+            if (item.curMScore) {
+              hasScore.push({
+                NAME: item.NAME,
+                USERID: item.ID,
+                SCORE: item.curMScore
+              });
+            } else {
+              noScore.push({
+                NAME: item.NAME,
+                USERID: item.ID,
+                SCORE: item.curMScore
+              });
+            }
           });
           let selectM = this.queryMonth;
-          // console.log("selectM", selectM);
           let curM = this.showFlag ? selectM.split("-")[1] : CURMONTH;
           let param = {
             data: JSON.stringify({
               TYPE: 1, // 录入页面
               YEAR: this.showFlag ? selectM.split("-")[0] : this.curYear,
               MONTH: this.showFlag ? selectM.split("-")[1] : CURMONTH,
-              USERS: tempData
+              USERS: hasScore
             })
           };
-
-          addPerformance(param).then(res => {
-            if (res.success) {
-              this.$confirm(`${this.yearMonth}绩效提交成功！`, "提示", {
+          if (noScore.length) {
+            let yearMonth = this.showFlag ? this.queryMonth : this.yearMonth;
+            this.$confirm(
+              <span style="text-align:left">
+                {yearMonth}绩效有{noScore.length}人未提交：
+                {noScore.map(item => item.NAME).join("，")}！
+              </span>,
+              "提示",
+              {
                 confirmButtonText: "确定",
                 cancelButtonText: "取消",
-                type: "success",
-                center: true,
-                showCancelButton: false
-              }).then(() => {
-                this.getPerformanceList();
-              });
-            }
+                type: "warning",
+                center: true
+              }
+            )
+              .then(() => {
+                this.insertPerformance(param);
+              })
+              .catch(() => {});
+          } else {
+            this.insertPerformance(param);
+          }
+        }
+      });
+    },
+    insertPerformance(param) {
+      addPerformance(param).then(res => {
+        if (res.success) {
+          let yearMonth = this.showFlag ? this.queryMonth : this.yearMonth;
+          this.$message({
+            message: `${yearMonth}绩效提交成功！`,
+            type: "success"
           });
+          this.getPerformanceList();
+          // this.$confirm(`${yearMonth}绩效提交成功！`, "提示", {
+          //   confirmButtonText: "确定",
+          //   cancelButtonText: "取消",
+          //   type: "success",
+          //   center: true,
+          //   showCancelButton: false
+          // }).then(() => {
+          //   this.getPerformanceList();
+          // });
         }
       });
     },
@@ -253,47 +271,60 @@ export default {
           YEAR: this.curYear,
           ORGID: ""
         })
-        // limit: this.pagesize,
-        // page: this.currentPage
       };
       fetchPerformanceList(param).then(res => {
-        this.total = res.items.length;
-        this.tableData = res.items;
-        let tempList = res ? JSON.parse(JSON.stringify(res.items)) : [];
-        tempList.forEach(item => {
-          if (item.PERFORMANCE.length) {
-            item.PERFORMANCE.forEach(m => {
-              let selectM = this.queryMonth;
-              // console.log("selectM", selectM);
-              let curM = this.showFlag ? selectM.split("-")[1] : CURMONTH;
-              // console.log("cuu", curM);
-              if (m.MONTH == curM) {
-                item.curMScore = m.SCORE;
-                item.disable = true;
-              }
-            });
-          } else {
-            item.curMScore = "";
-            item.disable = false;
-          }
-        });
-        this.userForm.userData = tempList;
+        if (res.success) {
+          this.total = res.items.length;
+          this.tableData = res.items;
+          let tempList = res ? JSON.parse(JSON.stringify(res.items)) : [];
+          let isEqual = this.curYear == this.yearMonth.split("-")[0]; // 查询年与当前年份是否一致
+          tempList.forEach(item => {
+            if (item.PERFORMANCE.length) {
+              item.PERFORMANCE.forEach(m => {
+                let selectM = this.queryMonth;
+                let curM = this.showFlag ? selectM.split("-")[1] : CURMONTH;
+                if (m.MONTH == curM) {
+                  item.curMScore = m.SCORE;
+                  item.disable = true;
+                }
+              });
+            } else if (!isEqual && !this.showFlag) {
+              // 非开放全部日期下，判断年份是否一致
+              item.disable = true;
+            } else {
+              item.curMScore = "";
+              item.disable = false;
+            }
+          });
+          this.userForm.userData = tempList;
+          this.isDisabled =
+            tempList.filter(item => item.disable == true).length > 0
+              ? true
+              : false;
+        }
       });
     },
 
     // 绩效提交可以按选择日期来，提交
     handleSelectPicker(val) {
-      // console.log("val111", val);
+      this.currentPage = 1;
       this.getPerformanceList();
     },
     // 年份变化时自动查询
     handleDatePicker(val) {
+      this.$refs.sortTable.clearSort();
+      this.currentPage = 1;
       this.getPerformanceList();
     },
 
     handleQuery() {
+      this.$refs.sortTable.clearSort();
       this.currentPage = 1;
       this.getPerformanceList();
+    },
+    handleSizeChange(val) {
+      this.pagesize = val;
+      this.currentPage = 1;
     },
 
     handleCurrentChange(currentPage) {
@@ -352,7 +383,9 @@ export default {
 .form-name::-webkit-scrollbar-thumb {
   /*滚动条里面小方块*/
   border-radius: 10px;
-  -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2); /*opera或ie9*/
+  -moz-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2); /*firefox*/
+  -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2); /*webkit*/
   background: #f8f8f8;
 }
 

@@ -6,6 +6,7 @@
       class="tab-left"
       @tab-click="handleClickTab"
     >
+      <!-- 判断是否包含相应子菜单，并保证每次重新强制渲染数据 -->
       <template v-for="(item) in menuTabs">
         <el-tab-pane
           :key="item.name"
@@ -14,7 +15,7 @@
           v-if="curSubmenus.includes(item.name)"
           lazy
         >
-          <component :is="item.name"></component>
+          <component v-if="menuTabsValue==item.name" :is="item.name"></component>
         </el-tab-pane>
       </template>
     </el-tabs>
@@ -26,10 +27,10 @@ import { getUserList } from "@/api/user";
 import staffManageTable from "./staffManageTable"; // 员工管理
 import staffCareTable from "./staffCareTable"; // 请假调休
 import quitManageTable from "./quitManageTable"; // 离职管理
-import page401 from "../errorPage/401"; // 无权限
 export default {
   data() {
     return {
+      isToggle: false,
       menuTabsValue: "",
       menuTabs: [
         {
@@ -50,22 +51,27 @@ export default {
   components: {
     staffManageTable,
     staffCareTable,
-    quitManageTable,
-    page401
+    quitManageTable
   },
   computed: {
     curSubmenus() {
       if (this.$store.state.menu.submenus.length) {
-        this.menuTabsValue = this.$store.state.menu.submenus[0];
-        console.log("state222", this.menuTabsValue);
+        if (!this.isToggle) {
+          this.menuTabsValue = this.$store.state.menu.submenus[0];
+        }
       }
       return this.$store.state.menu.submenus;
     }
   },
   created() {},
-  mounted() {},
+  mounted() {
+    this.menuTabsValue = this.curSubmenus[0] || "";
+  },
   methods: {
-    handleClickTab(tab, event) {}
+    handleClickTab(tab, event) {
+      this.isToggle = true;
+      this.menuTabsValue = tab.name;
+    }
   }
 };
 </script>

@@ -13,7 +13,7 @@
           @change="handleDatePicker"
           :clearable="false"
         ></el-date-picker>
-        <el-select class="query-picker" v-model="depvalue" placeholder="请选择部门">
+        <el-select class="query-picker" v-model="depvalue" placeholder="请选择部门" clearable>
           <el-option v-for="item in depOptions" :key="item.ID" :label="item.NAME" :value="item.ID"></el-option>
         </el-select>
         <el-button @click="handleQuery()" type="primary" size="small">查询</el-button>
@@ -21,13 +21,16 @@
         <el-button @click="handleExport()" type="primary" size="small">导出</el-button>
       </div>
     </div>
-    <!--    :sort-by="['average', 'total']" :default-sort="{prop: 'number', order: 'descending'}" -->
     <el-table
       :data="tableData.slice((currentPage-1)*pagesize,currentPage*pagesize)"
       style="width: 100%"
+      @sort-change="changeSort"
+      ref="sortTable"
     >
       <el-table-column label="序号" type="index" align="center" fixed="left"></el-table-column>
-      <el-table-column prop="ORGNAME" label="部门" align="center" fixed="left"></el-table-column>
+      <el-table-column prop="ORGNAME" label="部门" align="center" fixed="left">
+        <template slot-scope="scope">{{scope.row.ORGNAME||'-'}}</template>
+      </el-table-column>
       <el-table-column prop="NAME" label="姓名" align="center" fixed="left"></el-table-column>
       <el-table-column
         v-for=" records in monthCol"
@@ -36,19 +39,22 @@
         :label="records.label"
         :width="records.width"
         :fixed="records.fixed"
-        :sortable="records.sortable"
         align="center"
       >
         <template slot-scope="scope">{{getScore(scope)}}</template>
       </el-table-column>
+      <el-table-column prop="avg" label="平均分" align="center" fixed="right" sortable="custom"></el-table-column>
+      <el-table-column prop="total" label="总计" align="center" fixed="right" sortable="custom"></el-table-column>
     </el-table>
     <div class="pagination">
       <el-pagination
         background
-        layout="prev, pager, next"
         :total="total"
         :page-size="pagesize"
         :current-page="currentPage"
+        layout="sizes,prev, pager, next"
+        :page-sizes="[10, 20, 50, 100,200]"
+        @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       ></el-pagination>
     </div>
@@ -58,7 +64,7 @@
 <script>
 import { fetchPerformanceList, addPerformance } from "@/api/approval";
 import { fetchOrgList } from "@/api/auth";
-import { stringDay, nowMonth } from "@/utils/common";
+import { stringDay, nowMonth, tableSort } from "@/utils/common";
 const CURMONTH = nowMonth();
 const now = new Date();
 const yearVal = now.getFullYear();
@@ -99,21 +105,6 @@ export default {
           key: m
         });
       }
-      temp.push(
-        {
-          label: "平均分",
-          key: "average",
-          fixed: "right",
-          sortable: true
-        },
-        {
-          label: "总计",
-          key: "total",
-          fixed: "right",
-          sortable: true
-        }
-      );
-      // console.log("6666", temp);
       return temp;
     }
   },
@@ -129,61 +120,59 @@ export default {
       let m = d.getMonth() + 1;
       let performance = scope.row.PERFORMANCE;
       let label = scope.column.property;
-      let score = "-",
-        total = 0;
+      let score = "-";
       if (performance.length) {
         performance.map(item => {
-          total += item.SCORE;
           if (item.MONTH == label) {
             score = item.SCORE;
           }
         });
-        if (label == "total") {
-          score = total;
-        }
-        if (label == "average") {
-          score = (total / m).toFixed(1);
-        }
       }
       return score;
     },
 
+    changeSort(column) {
+      this.currentPage = 1;
+      let sortData = JSON.parse(JSON.stringify(this.tableData));
+      this.tableData = tableSort(sortData, column);
+    },
     getPerformanceList() {
-      console.log("depvalue", this.depvalue);
       let param = {
         data: JSON.stringify({
           TYPE: 2, // 年度报表
           YEAR: this.curYear,
           ORGID: this.depvalue
         })
-        // limit: this.pagesize,
-        // page: this.currentPage
       };
       fetchPerformanceList(param).then(res => {
-        console.log("rrrr", res);
         this.total = res.items.length;
         this.tableData = res.items;
       });
     },
 
     handleDatePicker(val) {
+      this.$refs.sortTable.clearSort();
+      this.currentPage = 1;
       this.getPerformanceList();
     },
 
     handleQuery() {
+      this.$refs.sortTable.clearSort();
       this.currentPage = 1;
       this.getPerformanceList();
     },
 
     handleExport(row) {
       let url = `/check/rest/Performance/export?data={"YEAR":'${this.curYear}',"ORGID":'${this.depvalue}'}`;
-      console.log("url", url);
       window.open(url, "_blank");
+    },
+    handleSizeChange(val) {
+      this.pagesize = val;
+      this.currentPage = 1;
     },
 
     handleCurrentChange(currentPage) {
       this.currentPage = currentPage;
-      // this.getPerformanceList();
     }
   }
 };

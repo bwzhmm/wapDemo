@@ -3,8 +3,8 @@
     <div class="table_head">
       <h4>离职管理</h4>
       <div>
-        <el-input v-model="queryName" class="query-picker" placeholder="请输入姓名"></el-input>
-        <el-select class="query-datapicker" v-model="depvalue" placeholder="请选择部门">
+        <el-input v-model="queryName" class="query-picker" placeholder="请输入姓名" clearable></el-input>
+        <el-select class="query-datapicker" v-model="depvalue" placeholder="请选择部门" clearable>
           <el-option v-for="item in depOptions" :key="item.ID" :label="item.NAME" :value="item.ID"></el-option>
         </el-select>
         <el-button @click="handleQuery()" type="primary" size="small">查询</el-button>
@@ -19,7 +19,7 @@
       </el-table-column>
       <el-table-column prop="NAME" label="姓名" align="center"></el-table-column>
       <el-table-column prop="SEX" label="性别" align="center">
-        <template slot-scope="scope">{{ scope.row.SEX=='2'?"女":'男'}}</template>
+        <template slot-scope="scope">{{ scope.row.SEX=='2'?"女":scope.row.SEX=='1'&&'男'||'-'}}</template>
       </el-table-column>
       <el-table-column prop="BIRTHDAY" label="出生日期" align="center">
         <template slot-scope="scope">{{ formatDay(scope.row.BIRTHDAY)||'-'}}</template>
@@ -38,10 +38,12 @@
     <div class="pagination">
       <el-pagination
         background
-        layout="prev, pager, next"
         :total="total"
         :page-size="pagesize"
         :current-page="currentPage"
+        layout="sizes,prev, pager, next"
+        :page-sizes="[10, 20, 50, 100,200]"
+        @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       ></el-pagination>
     </div>
@@ -159,7 +161,6 @@ export default {
     },
     // input边输入边查询人员
     querySearchAsync(queryString, cb) {
-      console.log("queryString", queryString);
       clearTimeout(this.timeout);
       this.timeout = setTimeout(() => {
         let param = {
@@ -175,7 +176,6 @@ export default {
           let tempData = res.items.map(item => {
             return { value: item.NAME, id: item.ID };
           });
-          console.log("tempData", tempData);
           cb(tempData);
         });
       }, 10 * Math.random());
@@ -230,6 +230,11 @@ export default {
     },
 
     handleQuery() {
+      this.currentPage = 1;
+      this.getQuitUserList();
+    },
+    handleSizeChange(val) {
+      this.pagesize = val;
       this.currentPage = 1;
       this.getQuitUserList();
     },

@@ -51,7 +51,7 @@
 
     <el-table :data="restData" style="width: 100%" v-show="activeName=='rest'">
       <el-table-column prop="TYPE" label="请假类型" width="110" align="center">
-        <template slot-scope="scope">{{ restTypeArr[scope.row.TYPE]}}</template>
+        <template slot-scope="scope">{{ scope.row.TYPE=='a'?'病假（病休）':restTypeArr[scope.row.TYPE]}}</template>
       </el-table-column>
       <el-table-column prop="DAY" label="请假时间" width="200" align="center">
         <template slot-scope="scope">
@@ -60,10 +60,19 @@
         </template>
       </el-table-column>
       <el-table-column prop="HOURS" label="请假时长" width="110" align="center">
-        <template slot-scope="scope">{{formatHour(scope.row)}}</template>
+        <template slot-scope="scope">{{scope.row.HOURS}}</template>
       </el-table-column>
       <el-table-column prop="REASON" label="请假原因" align="center">
-        <template slot-scope="scope">{{ scope.row.REASON}}</template>
+        <template slot-scope="scope">
+          {{ scope.row.REASON}}
+          <span
+            v-show="scope.row.TYPE=='a'"
+            @click="previewFile( scope.row.FILEID)"
+          >
+            ，
+            <span class="blue_sick">病假证明</span>
+          </span>
+        </template>
       </el-table-column>
       <el-table-column prop="STATE" label="申请状态" width="100" align="center">
         <template slot-scope="scope">{{ overTimeState[scope.row.STATE]}}</template>
@@ -75,15 +84,22 @@
     <div class="pagination">
       <el-pagination
         background
-        layout="prev, pager, next"
         :total="total"
         :page-size="pagesize"
         :current-page="currentPage"
+        layout="sizes,prev, pager, next"
+        :page-sizes="[5,10, 20, 50, 100,200]"
+        @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       ></el-pagination>
     </div>
     <!--  加班申请 -->
-    <el-dialog title="加班申请" :visible.sync="overtimeVisible" width="600px">
+    <el-dialog
+      title="加班申请"
+      :visible.sync="overtimeVisible"
+      width="600px"
+      :before-close="overTimeClose"
+    >
       <div class="tips_box">
         <i class="el-icon-warning"></i>
         <span>工作日加班时间从19:00起，以小时为单位计算，不足的不计算。</span>
@@ -114,7 +130,7 @@
               :label-width="formLabelWidth"
               prop="HOURS"
               :rules="[ { required: true, message: '请填写加班时长', trigger: 'blur' } ,
-                { pattern: /^(-[\d]{0,})$|^([\d]|[1][\d]|[2][0-4])$/, message: '须为小于24的正整数' } ]"
+                { pattern: /^(([1-9])|(1\d)|(2[0-4]))$/, message: '须为小于24的正整数' } ]"
             >
               <el-input v-model.number="workform.HOURS">
                 <span slot="suffix">小时</span>
@@ -134,6 +150,8 @@
                 type="textarea"
                 :autosize="{ minRows:3, maxRows:6}"
                 v-model="workform.REASON"
+                maxlength="200"
+                show-word-limit
                 placeholder="请输入加班原因，不超过200字"
               ></el-input>
             </el-form-item>
@@ -146,16 +164,21 @@
       </span>
     </el-dialog>
     <!--  请假调休弹框 -->
-    <el-dialog title="请假调休" :visible.sync="leaveVisible" width="700px">
+    <el-dialog title="请假调休" :visible.sync="leaveVisible" width="700px" :before-close="leaveClose">
       <div class="tips_box">
         <i class="el-icon-warning"></i>
         <span>
           您拥有加班时长
           <i class="blueColor">{{holidayInfo.RESTTIME}}</i>小时、年假
-          <i class="blueColor">{{holidayInfo.day}}</i>天
+          <span v-show="holidayInfo.day">
+            <i class="blueColor">{{holidayInfo.day}}</i>天
+          </span>
           <span v-show="holidayInfo.hour">
             <i class="blueColor">{{holidayInfo.hour}}</i>小时
-          </span>，可用于请假调休
+          </span>
+          <span v-show="!holidayInfo.day&&!holidayInfo.hour">
+            <i class="blueColor">0</i>小时
+          </span>，可用于请假调休。
         </span>
       </div>
       <el-form :model="leaveform" ref="leaveform">
@@ -186,11 +209,19 @@
               </el-select>
             </el-form-item>
           </el-col>
+
+          <el-col
+            :span="2"
+            style="margin-left:10px;line-height: 28px;"
+            v-show="leaveform.TYPE=='1'"
+          >
+            <el-checkbox v-model="sickChecked">病休</el-checkbox>
+          </el-col>
         </el-row>
         <el-row>
-          <el-col :span="(hourType.includes(leaveform.TYPE) )?10:12">
+          <el-col :span="iSOneDay?10:12">
             <el-form-item
-              v-show="hourType.includes(leaveform.TYPE) "
+              v-if="iSOneDay "
               label="请假日期:"
               :label-width="formLabelWidth"
               prop="DAY"
@@ -205,11 +236,11 @@
               ></el-date-picker>
             </el-form-item>
             <el-form-item
-              v-show="!hourType.includes(leaveform.TYPE) "
+              v-show="!iSOneDay "
               label="请假日期:"
               :label-width="formLabelWidth"
               prop="rangeDAY"
-              :rules="[ { required: true, message: '请选择请假日期', trigger: 'blur' }  ]"
+              :rules="[ { required: !iSOneDay, message: '请选择请假日期', trigger: 'blur' }  ]"
             >
               <el-date-picker
                 v-model="leaveform.rangeDAY"
@@ -223,7 +254,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="10">
-            <div v-if="hourType.includes(leaveform.TYPE) ">
+            <div v-if="iSOneDay">
               <span class="hourTip">半天=4小时，一天=8小时</span>
               <el-form-item
                 v-if="leaveform.TYPE=='5'||leaveform.TYPE=='6' "
@@ -266,8 +297,36 @@
                 type="textarea"
                 :autosize="{ minRows:3, maxRows:6}"
                 v-model="leaveform.REASON"
+                maxlength="200"
+                show-word-limit
                 placeholder="请输入请假原因，不超过200字"
               ></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row v-if="leaveform.TYPE=='1' && sickChecked">
+          <el-col :span="20">
+            <el-form-item
+              label="病假证明："
+              :label-width="formLabelWidth"
+              prop="FILEID"
+              :rules="[ { required: true, message: '请上传病假证明', trigger: 'blur' }  ]"
+            >
+              <base-upload
+                :url="uploadUrl"
+                :size="5*1024"
+                :lowSize="10"
+                :exts="fileType"
+                btnText="点击上传"
+                :isBtn="true"
+                @done="finish"
+              ></base-upload>
+              <div class="upload-tip">支持.bmp .jpeg .jpg .gif .png，大小不超过5M</div>
+              <span v-if="leaveform.FILEID">
+                <i class="el-icon-paperclip"></i>
+                <span :title="fileTitle" class="file-title">{{fileTitle}}</span>
+                <i class="el-icon-close del-file" @click="delFile"></i>
+              </span>
             </el-form-item>
           </el-col>
         </el-row>
@@ -277,16 +336,21 @@
         <el-button type="primary" @click="restSubmit('leaveform')">提交</el-button>
       </span>
     </el-dialog>
+    <el-dialog :visible.sync="imgVisible" :append-to-body="true" class="img-dialog">
+      <img width="100%" :src="dialogImageUrl" alt />
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import BaseUpload from "@/components/BaseUpload";
 import {
   fetchOvertimeList,
   addOvertime,
   fetchRestList,
   InsertRestList,
-  getRestHoliday
+  getRestHoliday,
+  getRestDays
 } from "@/api/approval";
 import util from "@/utils/util";
 import {
@@ -297,6 +361,7 @@ import {
 } from "@/utils/common";
 
 export default {
+  components: { BaseUpload },
   data() {
     return {
       restTypeArr: [
@@ -318,7 +383,7 @@ export default {
       queryDay: rangeMonth(""),
       overtimeData: [],
       restData: [],
-      total: 0,
+      total: 100,
       pagesize: 5,
       currentPage: 1,
       overtimeVisible: false,
@@ -333,7 +398,8 @@ export default {
         DAY: "",
         TYPE: "3",
         REASON: "",
-        HOURS: ""
+        HOURS: "",
+        FILEID: ""
       },
       formLabelWidth: "100px",
       holidayInfo: {
@@ -341,16 +407,40 @@ export default {
         YEARTIME: "0",
         day: "0",
         hour: "0"
-      }
+      },
+      isFlag: true, //事假时只给出年假和加班时长提醒
+      sickChecked: false,
+      sickDay: "0",
+      fileID: "", //上传图片
+      fileType: "bmp|jpeg|jpg|gif|png",
+      fileTitle: "",
+      uploadUrl: `${window.global.ApiUrl}/fileweb/rest/FileOut/saveFile`,
+      remoteOptions: [],
+      dialogImageUrl: "",
+      imgVisible: false
     };
   },
+
   computed: {
     allleaveDays: function() {
       let str = "0";
       str = this.leaveform.rangeDAY
         ? dataDiffDay(this.leaveform.rangeDAY[0], this.leaveform.rangeDAY[1])
         : "0";
+      if (
+        this.sickChecked &&
+        Array.isArray(this.leaveform.rangeDAY) &&
+        this.leaveform.rangeDAY[1]
+      ) {
+        this.getSickDay();
+        str = this.sickDay;
+      }
       return str;
+    },
+    iSOneDay: function() {
+      let isRange =
+        this.hourType.includes(this.leaveform.TYPE) && !this.sickChecked;
+      return isRange;
     }
   },
   mounted() {
@@ -358,7 +448,6 @@ export default {
   },
   methods: {
     formatDay(day) {
-      // console.log("dd111", day);
       return day ? util.formatTime(day, "YYYY-MM-DD") : "";
     },
 
@@ -372,21 +461,59 @@ export default {
         this.holidayInfo.day = dayandhour.split("天")[0];
       }
       if (dayandhour.includes("小时")) {
-        this.holidayInfo.hour = dayandhour.split("天")[1].split("小时")[0];
+        this.holidayInfo.hour = dayandhour.includes("天")
+          ? dayandhour.split("天")[1].split("小时")[0]
+          : dayandhour.split("小时")[0];
       }
     },
 
-    formatHour(row) {
-      let hour =
-        row.DAYTYPE == "2"
-          ? `${dataDiffDay(
-              this.formatDay(row.STARTDAY),
-              this.formatDay(row.ENDDAY)
-            )}天`
-          : `${getDayAndHour(row.HOURS)}`;
-      return hour;
+    //获取病假天数，去除节假日
+    getSickDay() {
+      let sickday = this.leaveform.rangeDAY;
+      let param = {
+        data: JSON.stringify({
+          STARTDAY: sickday ? stringDay(sickday[0]) : "",
+          ENDDAY: sickday ? stringDay(sickday[1]) : ""
+        })
+      };
+      getRestDays(param).then(res => {
+        if (res.success) {
+          this.sickDay = res.item.DAYS;
+        }
+      });
+    },
+    previewFile(fileId) {
+      let url = `${window.global.ApiUrl}/fileweb/rest/FileOut/view/${fileId}`;
+      this.dialogImageUrl = url;
+      this.imgVisible = true;
     },
 
+    // 图片上传完成后 ，新增上传完成后
+    finish(res) {
+      if (res.success && res.data[0]) {
+        this.leaveform.FILEID = res.data[0].ID;
+        this.fileTitle = res.data[0].TITLE;
+        this.$forceUpdate();
+        this.$message({
+          type: "success",
+          message: "上传成功，并覆盖已上传的文件！"
+        });
+      }
+    },
+    delFile() {
+      this.fileTitle = "";
+      this.leaveform.FILEID = "";
+    },
+    leaveClose(done) {
+      done();
+      this.$refs["leaveform"].resetFields();
+      this.leaveVisible = false;
+    },
+    overTimeClose(done) {
+      done();
+      this.$refs["workform"].resetFields();
+      this.overtimeVisible = false;
+    },
     handleCancel(fromname) {
       this.$refs[fromname].resetFields();
       this.leaveVisible = false;
@@ -395,12 +522,14 @@ export default {
 
     //类型改变时,清空数据
     changeSelect(val) {
-      // console.log("va", val);
       this.leaveform.HOURS = "";
-      this.leaveform.Day = "";
+      this.leaveform.DAY = "";
       this.leaveform.rangeDAY = "";
-      // this.$refs["leaveDay"].resetField();
-      // console.log("this.leaveform.Day", this.leaveform.Day);
+      this.leaveform.REASON = "";
+      this.leaveform.FILEID = "";
+      this.fileTitle = "";
+      this.sickChecked = false;
+      this.isFlag = true;
     },
 
     handleQuery() {
@@ -409,12 +538,12 @@ export default {
     handleClickTab(tab, event) {
       this.activeName = tab.name;
       this.queryDay = rangeMonth("");
+      this.pagesize = 5;
+      this.currentPage = 1;
       this.getApplyList();
-      // console.log("tab", tab);
     },
     // 获取列表数据
     getApplyList() {
-      console.log("tab", this.queryDay);
       if (this.activeName == "overtime") {
         let param = {
           data: JSON.stringify({
@@ -442,7 +571,32 @@ export default {
         };
         fetchRestList(param).then(res => {
           this.total = res.total;
-          this.restData = res.items;
+          // this.restData = res.items;
+          let itemsArr = res.items;
+          itemsArr.map(item => {
+            if (item.TYPE == "a") {
+              let param = {
+                data: JSON.stringify({
+                  STARTDAY: item.STARTDAY,
+                  ENDDAY: item.ENDDAY
+                })
+              };
+              getRestDays(param).then(res => {
+                if (res.success) {
+                  item.HOURS = `${res.item.DAYS}天`;
+                }
+              });
+            } else {
+              item.HOURS =
+                item.DAYTYPE == "2"
+                  ? `${dataDiffDay(
+                      this.formatDay(item.STARTDAY),
+                      this.formatDay(item.ENDDAY)
+                    )}天`
+                  : `${getDayAndHour(item.HOURS)}`;
+            }
+          });
+          this.restData = itemsArr;
         });
       }
     },
@@ -475,12 +629,14 @@ export default {
       this.$refs[fromname].validate(valid => {
         if (valid) {
           let dayType = this.hourType.includes(this.leaveform.TYPE) ? "1" : "2";
+          if (this.leaveform.TYPE == "1" && this.sickChecked) {
+            dayType = "2";
+          }
           // 加班时长或年假不足时，无法申请调休或年假
           let type =
             this.leaveform.TYPE == "2" &&
             this.leaveform.HOURS > this.holidayInfo.RESTTIME;
-          console.log("type", type);
-          // return false;
+
           if (
             this.leaveform.TYPE == "2" &&
             this.leaveform.HOURS > this.holidayInfo.RESTTIME
@@ -518,25 +674,79 @@ export default {
               DAYTYPE: "2",
               STARTDAY: stringDay(this.leaveform.rangeDAY[0]),
               ENDDAY: stringDay(this.leaveform.rangeDAY[1]),
-              TYPE: this.leaveform.TYPE,
+              TYPE: this.sickChecked ? "a" : this.leaveform.TYPE,
               REASON: this.leaveform.REASON
             };
+          }
+          if (this.leaveform.TYPE == "1") {
+            obj.FILEID = this.leaveform.FILEID;
+            obj.FILENAME = this.fileTitle;
           }
 
           let param = {
             data: JSON.stringify(obj)
           };
-          InsertRestList(param).then(res => {
-            if (res.success) {
-              this.$message({
-                message: "请假调休申请成功",
-                type: "success"
+          //请假类型为事假且有余额时，提示
+          if (
+            this.isFlag &&
+            this.leaveform.TYPE == "3" &&
+            (this.holidayInfo.RESTTIME > 0 || this.holidayInfo.YEARTIME > 0)
+          ) {
+            this.$confirm(
+              <div style="text-align:left;text-indent:18px">
+                <p>
+                  {this.holidayInfo.RESTTIME > 0 &&
+                    `您拥有加班时长${this.holidayInfo.RESTTIME}小时（可申请调休） `}
+                  {this.holidayInfo.RESTTIME > 0 &&
+                  (this.holidayInfo.day || this.holidayInfo.hour > 0)
+                    ? "，"
+                    : ""}
+                </p>
+                <p>
+                  {this.holidayInfo.day || this.holidayInfo.hour > 0
+                    ? `您拥有年假${
+                        this.holidayInfo.day ? this.holidayInfo.day + "天" : ""
+                      } ${
+                        this.holidayInfo.hour
+                          ? this.holidayInfo.hour + "小时"
+                          : ""
+                      }`
+                    : ""}
+                </p>
+              </div>,
+              "确认要申请事假吗？",
+              {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning",
+                center: true
+              }
+            )
+              .then(() => {
+                this.isFlag = false;
+              })
+              .catch(() => {
+                this.isFlag = false;
               });
-              this.getApplyList();
-              this.leaveVisible = false;
-              this.$refs[fromname].resetFields();
-            }
-          });
+          } else {
+            this.isFlag = false;
+          }
+          if (
+            (!this.isFlag && this.leaveform.TYPE == "3") ||
+            this.leaveform.TYPE !== "3"
+          ) {
+            InsertRestList(param).then(res => {
+              if (res.success) {
+                this.$message({
+                  message: "请假调休申请成功",
+                  type: "success"
+                });
+                this.getApplyList();
+                this.leaveVisible = false;
+                this.$refs[fromname].resetFields();
+              }
+            });
+          }
         }
       });
     },
@@ -560,6 +770,11 @@ export default {
     },
     handleCurrentChange(currentPage) {
       this.currentPage = currentPage;
+      this.getApplyList();
+    },
+    handleSizeChange(val) {
+      this.pagesize = val;
+      this.currentPage = 1;
       this.getApplyList();
     }
   }
@@ -596,5 +811,22 @@ span.hourTip {
 span.dayTips {
   line-height: 28px;
   margin-left: 10px;
+}
+.upload-tip {
+  color: #cdcdcd;
+  line-height: normal;
+  margin-top: 10px;
+}
+.file-title {
+  color: #000;
+  opacity: 0.65;
+}
+.del-file {
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.img-dialog /deep/ .el-dialog__headerbtn {
+  top: 5px;
 }
 </style>

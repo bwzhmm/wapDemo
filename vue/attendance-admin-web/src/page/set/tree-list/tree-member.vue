@@ -42,9 +42,7 @@ export default {
       checkedItems: []
     };
   },
-  mounted() {
-    console.log("tree-member", this.treeData);
-  },
+  mounted() {},
 
   methods: {
     //点击父节点 选中全部
@@ -77,9 +75,6 @@ export default {
       }
       let isAllChecked = childrenIds.subsetTo(allChecked);
       let isIncludes = childrenIds.includeTo(allChecked); //半选
-      // console.log("isIncludes", isIncludes);
-      // console.log("isAllChecked", isAllChecked);
-      // console.log("this.tree", tree);
       tree.isCheckAll = isAllChecked;
       tree.isIndeterminate = !isAllChecked && isIncludes;
     },
@@ -88,16 +83,17 @@ export default {
       this.$emit("update:dialogVisible", false);
     },
     submit() {
-      console.log("this.checkedItems", this.checkedItems);
+      let uniqueCheckedIDs = [...new Set(this.checkedItems)];
       let param = {
         data: JSON.stringify({
           ROLEID: this.curRole.ID,
-          USERID: this.checkedItems
+          USERID: uniqueCheckedIDs
         })
       };
       saveUserRole(param).then(res => {
         if (res.success) {
           this.$emit("update:dialogVisible", false);
+          this.$emit("flushList");
           this.$message({
             message: "提交成功",
             type: "success"

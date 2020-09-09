@@ -26,15 +26,13 @@
           <span class="opacity_25 mg_left10">包括年假、调休假期</span>
         </el-form-item>
 
-        <!-- <label class="el-form-item__label" style="width: 120px;">年假扣除：</label>
-        <el-form-item>-->
         <el-form-item label="年假扣除：" :label-width="formLabelWidth">
           <el-button @click="handleAnnualLeave()">添加</el-button>
           <el-table :data="setForm.YEAR" class="mg_tab">
             <el-table-column prop="DAY" label="日期">
               <template slot-scope="scope">{{formatDay(scope.row.DAY)}}</template>
             </el-table-column>
-            <el-table-column prop="DES" label="扣除说明" width="180"></el-table-column>
+            <el-table-column prop="DES" label="扣除说明" width="250"></el-table-column>
           </el-table>
         </el-form-item>
       </el-form>
@@ -72,7 +70,7 @@
             v-model="setForm.noNeedDate"
             type="date"
             value-format="yyyyMMdd"
-            placeholder="选择"
+            placeholder="选择日期"
             class="picker_width140"
           ></el-date-picker>
           <el-button @click="addSpecialDate(false)">添加</el-button>
@@ -99,8 +97,8 @@
                 v-model="setForm.CFG.STARTTIME"
                 class="picker_width100"
                 :picker-options="{
-                  start: '08:30',
-                  step: '00:05',
+                  start: '08:29',
+                  step: '00:01',
                   end: '18:30'
                 }"
               ></el-time-select>
@@ -112,10 +110,9 @@
                 v-model="setForm.CFG.STARTTIME_LATEST"
                 class="picker_width100"
                 :picker-options="{
-                  start: '08:30',
-                  step: '00:05',
+                  start: '08:29',
+                  step: '00:01',
                   end: '18:30',
-                 minTime: setForm.CFG.STARTTIME
                 }"
               ></el-time-select>
             </el-form-item>
@@ -128,9 +125,9 @@
             multiple
             filterable
             remote
-            reserve-keyword
             placeholder="请输入姓名查找"
             :remote-method="querySearchAsync"
+            @visible-change="(val)=>{selectChange(val)}"
             :loading="loading"
             style="width:100%"
             class="select-user"
@@ -181,7 +178,13 @@
               prop="desc"
               :rules="[ { required: true, message: '请输入说明，不超过200字', trigger: 'blur' }  ]"
             >
-              <el-input type="textarea" :autosize="{minRows:2,maxRow:4}" v-model="annualForm.desc"></el-input>
+              <el-input
+                type="textarea"
+                :autosize="{minRows:2,maxRow:4}"
+                v-model="annualForm.desc"
+                maxlength="200"
+                show-word-limit
+              ></el-input>
             </el-form-item>
           </el-col>
         </el-row>
@@ -289,11 +292,7 @@ export default {
           return { label: item.NAME, value: item.ID };
         });
         setData.outUser = tempData.map(item => item.value);
-
-        console.log("tempData", tempData);
         this.selectUsers = tempData;
-
-        console.log("setData", setData);
         this.setForm = JSON.parse(JSON.stringify(setData));
         this.initSetList = JSON.parse(JSON.stringify(setData));
       });
@@ -301,7 +300,6 @@ export default {
 
     resetForm(formName) {
       this.$refs[formName].resetFields();
-      console.log("initSetList", this.initSetList);
       this.setForm = JSON.parse(JSON.stringify(this.initSetList));
     },
 
@@ -334,7 +332,6 @@ export default {
         ? this.setForm.needDate || ""
         : this.setForm.noNeedDate || "";
 
-      //   console.log("flag", flag);
       if (specialDay) {
         let curArr = this.setForm.SPECIALDAY.map(item => item.DATE);
         let flag = curArr.some(item => item == specialDay);
@@ -364,11 +361,9 @@ export default {
         item => item.DATE !== row.DATE
       );
       this.setForm.SPECIALDAY = curArr;
-      console.log("tttt", curArr);
     },
 
     submitForm(formName) {
-      console.log("tttt333", this.setForm);
       let CFG = JSON.parse(JSON.stringify(this.setForm.CFG));
       CFG.STARTTIME = formatTimeStr(CFG.STARTTIME);
       CFG.STARTTIME_LATEST = formatTimeStr(CFG.STARTTIME_LATEST);
@@ -381,7 +376,6 @@ export default {
           UNUSE: this.setForm.outUser
         })
       };
-      console.log("param", param);
       saveSets(param).then(res => {
         if (res.success) {
           this.$message({
@@ -392,8 +386,14 @@ export default {
       });
     },
 
+    //初次点击展开时调接口
+    selectChange(val) {
+      if (val) {
+        this.querySearchAsync("");
+      }
+    },
+
     querySearchAsync(queryString, cb) {
-      console.log("queryString", queryString);
       clearTimeout(this.timeout);
       this.timeout = setTimeout(() => {
         let param = {

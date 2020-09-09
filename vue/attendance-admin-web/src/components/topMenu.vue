@@ -60,9 +60,7 @@ export default {
   created() {
     this.getUserMenu();
   },
-  mounted() {
-    // console.log("resa", this.$route);
-  },
+  mounted() {},
   methods: {
     handleSelect(key, keyPath) {
       this.$router.push({
@@ -73,7 +71,6 @@ export default {
 
     handleSubMenus(key) {
       let allmenusData = this.allmenusList;
-      console.log("child", key);
       let childmenu = [];
       allmenusData.forEach(item => {
         if (item.NAME == key) {
@@ -83,8 +80,6 @@ export default {
       childmenu = childmenu.length
         ? childmenu.map(item => item.DISPLAYURL)
         : [];
-      // childmenu = [];
-      console.log("childmenu", childmenu);
       this.$store.commit("SET_SubMenus", childmenu);
     },
 
@@ -96,23 +91,16 @@ export default {
         if (res.success) {
           this.$store.commit("SET_UserInfo", res.data);
         }
-        console.log("fetchCurrentUser", res);
       });
 
       fetchUserMenu(param).then(res => {
         if (res.length) {
           this.$store.commit("SET_AllMenus", res);
           let menuData = res.map(item => item.NAME);
-          console.log("menuData", menuData);
-          // menuData = ["home", "report", "set"];
           this.showMenu = menuData;
-          console.log("resa", this.$route);
           let key = this.$route.path.split("/")[1];
-          console.log("key", key);
           this.handleSubMenus(key);
         }
-
-        console.log("getUserMenu", res);
       });
     }
   }
@@ -123,7 +111,6 @@ export default {
   border: none !important;
 }
 .el-menu--horizontal > .el-menu-item {
-  // float: left;
   height: 60px;
   line-height: 55px !important;
   margin: 0;

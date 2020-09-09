@@ -40,7 +40,7 @@
 
 <script>
 import loginImg from "@/assets/img/login_center.png";
-import { login } from "@/api/user";
+// import { login } from "@/api/user";
 
 export default {
   data() {
@@ -75,11 +75,11 @@ export default {
         if (valid) {
           let userinfo = this.loginForm;
 
-          login(userinfo).then(res => {
-            let userList = res.data.userList;
-            this.$router.push({ path: "/home" });
-            // this.$store.dispatch("initLeftMenu"); //设置左边菜单始终为展开状态
-          });
+          // login(userinfo).then(res => {
+          //   let userList = res.data.userList;
+          //   this.$router.push({ path: "/home" });
+          //   // this.$store.dispatch("initLeftMenu"); //设置左边菜单始终为展开状态
+          // });
         }
       });
     }

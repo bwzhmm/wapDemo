@@ -18,12 +18,11 @@ let startAjax = function (options) {
   return new Promise(function (resolve, reject) {
     if (options && options.url && options.code) {
       getRealUrl(options.code, options.url).then(function (data) {
-        // console.log('data', data)
         let ajaxSettings = {
           url: data,
           method: 'POST',
           headers: {
-            "IDSTGC": getCookie("IDSTGC") || '127219c604ff44dea900aa33779e0e2d',
+            "IDSTGC": getCookie("IDSTGC") || '879532c838704495b8b01214b29b4812',
           },
           data: options.isRep ? (options.data) : (qs.stringify(options.data) || ''),
         }
@@ -31,18 +30,12 @@ let startAjax = function (options) {
           let orgindata = data;
           let res = data.data;
           if (res.login === false) {
-            // console.log('resa', res)
             resolve(res);
             // Message.error('未登录');
-            // setting.tips(res.message);
             redirectToLogin();
-            // alert('no login');
           } else {
             if (res.success === false) {
               Message.error(res.errInf.metailBusInf || '接口出错了');
-              // setting.tips(res.message);
-              // setting.tips(res.errInf.metailBusInf);
-              // orgindata.login = false;
               resolve(orgindata);
             } else {
               resolve(res);
@@ -56,7 +49,6 @@ let startAjax = function (options) {
       });
     } else {
       reject('参数错误！');
-      // setting.tips('参数错误！');
     }
   })
 }
@@ -73,13 +65,11 @@ let redirectToLogin = function (Url) {
   if (Url) {
     return Url;
   } else {
-    let pathName = window.location.href.split('attendance')[0];
-    let url = pathName + '/idsweb/';//http://160.255.0.67:8888/attendance
     let purl = document.location.href;//
     purl = document.location.href.split('#')[0];
     // let herfUrl = 'http://172.20.1.236:80/check/rest/Idsclient/reqLogin?reqUrl=' + encodeURIComponent(purl);
-    let herfUrl = 'http://160.255.0.67:8888/check/rest/Idsclient/reqLogin?reqUrl=' + encodeURIComponent(purl);
-    // alert(herfUrl)
+    // let herfUrl = 'http://160.255.0.67:8888/check/rest/Idsclient/reqLogin?reqUrl=' + encodeURIComponent(purl);
+    let herfUrl = window.global.redirectToUrl + encodeURIComponent(purl);
     if (process.env.NODE_ENV === "production") {
       location.href = herfUrl;
     }

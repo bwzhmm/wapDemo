@@ -1,6 +1,5 @@
 // 小时转为 多少天小时
 export function getDayAndHour(HOUR) {
-  // console.log('HOUR', HOUR)
   let days = 0, hours = 0, str = '';
   if (HOUR >= 8) {
     days = parseInt(HOUR / 8);//除 取整为天
@@ -10,13 +9,11 @@ export function getDayAndHour(HOUR) {
 
     str = HOUR == 4 ? '半天' : `${HOUR}小时`;
   }
-  // console.log('str', str)
   return str;
 };
 
 // 日期去掉-
 export function stringDay(day) {
-  // console.log('d', day)
   return day ? day.replace(/-/g, "") : day;
 };
 
@@ -49,7 +46,7 @@ export function dataDiffDay(start, end) {
 export function nowMonth(day) {
   let nowDate = new Date();
   let month = nowDate.getMonth() + 1;
-  month = month < 9 ? `0${month}` : `${month}`
+  month = month < 10 ? `0${month}` : `${month}`
   return month;
 };
 
@@ -68,15 +65,14 @@ export function rangeMonth(format) {
   const start = new Date();
   start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
   let endmonth = end.getMonth() + 1, endDay = end.getDate(), startmonth = start.getMonth() + 1, startDay = start.getDate();
-  endmonth = endmonth < 9 ? `0${endmonth}` : `${endmonth}`;
-  endDay = endDay < 9 ? `0${endDay}` : `${endDay}`;
+  endmonth = endmonth < 10 ? `0${endmonth}` : `${endmonth}`;
+  endDay = endDay < 10 ? `0${endDay}` : `${endDay}`;
 
-  startmonth = startmonth < 9 ? `0${startmonth}` : `${startmonth}`;
-  startDay = startDay < 9 ? `0${startDay}` : `${startDay}`;
+  startmonth = startmonth < 10 ? `0${startmonth}` : `${startmonth}`;
+  startDay = startDay < 10 ? `0${startDay}` : `${startDay}`;
   let endstr = end.getFullYear() + format + endmonth + format + endDay,
     startstr = start.getFullYear() + format + startmonth + format + startDay;
   let range = [startstr, endstr];
-  console.log('rang', range)
   return range;
 };
 
@@ -84,8 +80,8 @@ export function rangeMonth(format) {
 export function nowYMD(format) {
   let nowDate = new Date();
   let month = nowDate.getMonth() + 1, day = nowDate.getDate();
-  month = month < 9 ? `0${month}` : `${month}`;
-  day = day < 9 ? `0${day}` : `${day}`
+  month = month < 10 ? `0${month}` : `${month}`;
+  day = day < 10 ? `0${day}` : `${day}`
   let str = nowDate.getFullYear() + format + month + format + day;
   return str;
 };
@@ -94,7 +90,7 @@ export function nowYMD(format) {
 export function nowYearMonth(format) {
   let nowDate = new Date();
   let month = nowDate.getMonth() + 1;
-  month = month < 9 ? `0${month}` : `${month}`
+  month = month < 10 ? `0${month}` : `${month}`
   let str = nowDate.getFullYear() + format + month;
   return str;
 };
@@ -113,6 +109,9 @@ export function formatStr(time, format, flag) {
         timeStr = timeStr.slice(0, 2) + format + timeStr.slice(2, 4); //hh:mm:ss 去掉ss
       }
       break;
+    case 8:
+      timeStr = timeStr.slice(0, 4) + format + timeStr.slice(4, 6) + format + timeStr.slice(6, 8);  //yyyy-mm-dd
+      break;
   }
   return timeStr;
 };
@@ -128,3 +127,32 @@ export function formatTimeStr(time, format) {
   return timeStr;
 }
 
+
+// 升降排序
+export function tableSort(tableData, column) {
+  //获取字段名称和排序类型
+  var fieldName = column.prop;
+  var sortingType = column.order;
+  let sortlist = tableData.filter(item => item[fieldName] !== '-');
+  let nosortList = tableData.filter(item => item[fieldName] == '-');
+  //按照降序排序
+  if (sortingType == "descending") {
+    sortlist = sortlist.sort(
+      (a, b) => {
+        let x = b[fieldName] - a[fieldName];
+        return x;
+      }
+    );
+  }
+  //按照升序排序
+  else {
+    sortlist = sortlist.sort(
+      (a, b) => {
+        let x = a[fieldName] - b[fieldName];
+        return x;
+      }
+    );
+  }
+  let allData = [...sortlist, ...nosortList];
+  return allData;
+};

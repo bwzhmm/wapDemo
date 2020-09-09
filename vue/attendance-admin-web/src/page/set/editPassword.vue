@@ -6,7 +6,7 @@
     <div class="passwordBox">
       <div class="tips_box">
         <i class="el-icon-warning"></i>
-        <span>密码至少6位，包含字母和数字。</span>
+        <span>密码至少6位，包含数字、大小写字母和特殊字符。</span>
       </div>
       <el-form
         :model="ruleForm"
@@ -147,7 +147,7 @@ export default {
   background: #fff;
 }
 .passwordBox {
-  width: 320px;
+  width: 370px;
   .tips_box {
     margin: 30px;
     width: 100%;

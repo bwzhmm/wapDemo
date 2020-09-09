@@ -26,9 +26,9 @@
                   v-model="dep.MANAGERID"
                   filterable
                   remote
-                  reserve-keyword
                   placeholder="请输入姓名查找"
                   :remote-method="(query)=>{querySearchAsync(query,index,true)}"
+                  @visible-change="(val)=>{selectChange(val,index,true)}"
                   :loading="loading"
                   style="width:100%"
                   class="select-user"
@@ -52,9 +52,9 @@
                   v-model="dep.LEADERID"
                   filterable
                   remote
-                  reserve-keyword
                   placeholder="请输入姓名查找"
                   :remote-method="(query)=>{querySearchAsync(query,index,false)}"
+                  @visible-change="(val)=>{selectChange(val,index,false)}"
                   :loading="loading"
                   style="width:100%"
                   class="select-user"
@@ -91,9 +91,24 @@
           <template slot-scope="scope">
             <span class="opacity_65" v-if="scope.row.NAME=='超级管理员'">所有权限</span>
             <!-- v-if="scope.row.CODE>3" v-if="scope.row.CODE>1" -->
-            <el-button @click="handleAuthClick(scope.row)" type="text" size="small">权限维护</el-button>
-            <el-button @click="handleMemberClick(scope.row)" type="text" size="small">成员维护</el-button>
-            <el-button @click="handleDeleteRole(scope.row)" type="text" size="small">删除角色</el-button>
+            <el-button
+              @click="handleAuthClick(scope.row)"
+              type="text"
+              size="small"
+              v-if="scope.row.CODE>1|| !scope.row.CODE "
+            >权限维护</el-button>
+            <el-button
+              @click="handleMemberClick(scope.row)"
+              type="text"
+              size="small"
+              v-if="scope.row.CODE>2 || !scope.row.CODE "
+            >成员维护</el-button>
+            <el-button
+              @click="handleDeleteRole(scope.row)"
+              type="text"
+              size="small"
+              v-if="scope.row.CODE>3 || !scope.row.CODE"
+            >删除角色</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -103,18 +118,25 @@
       <el-form :model="roleForm" ref="roleForm">
         <el-row>
           <el-col :span="20">
-            <el-form-item label="角色组:" label-width="100px">
+            <el-form-item
+              label="角色组:"
+              label-width="100px"
+              prop="NAME"
+              :rules="[{ required: true, message: '角色组名称不能为空', trigger: 'blur'}]"
+            >
               <el-input v-model="roleForm.NAME" placeholder="请输入角色组名称"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span="20">
-            <el-form-item label="描述:" label-width="100px">
+            <el-form-item label="描述:" label-width="100px" prop="DES">
               <el-input
                 type="textarea"
                 :autosize="{ minRows:3, maxRows:6}"
                 v-model="roleForm.DES"
+                maxlength="200"
+                show-word-limit
                 placeholder="请输入描述内容，不超过200字"
               ></el-input>
             </el-form-item>
@@ -123,8 +145,8 @@
       </el-form>
 
       <span slot="footer" class="dialog-footer">
-        <el-button @click="roleCancel">取消</el-button>
-        <el-button type="primary" @click="submitRole">提交</el-button>
+        <el-button @click="roleCancel('roleForm')">取消</el-button>
+        <el-button type="primary" @click="submitRole('roleForm')">提交</el-button>
       </span>
     </el-dialog>
     <tree-auth
@@ -140,6 +162,7 @@
       :treeData="memberTreeData"
       :curRole="curRole"
       :dialogVisible.sync="memberVisible"
+      @flushList="handleFlush"
     ></tree-member>
   </div>
 </template>
@@ -190,6 +213,10 @@ export default {
     this.getRoleGroupList();
   },
   methods: {
+    // 成员权限提交刷新
+    handleFlush() {
+      this.getRoleGroupList();
+    },
     // 获取部门列表
     getOrgList() {
       fetchOrgList().then(res => {
@@ -213,6 +240,21 @@ export default {
       });
     },
 
+    // 数组中按对象某属性排序
+    compare(prop) {
+      return function(obj1, obj2) {
+        var val1 = obj1[prop];
+        var val2 = obj2[prop];
+        if (val1 < val2) {
+          return -1;
+        } else if (val1 > val2) {
+          return 1;
+        } else {
+          return 0;
+        }
+      };
+    },
+
     // 获取角色组列表
     getRoleGroupList() {
       let param = {
@@ -221,21 +263,42 @@ export default {
         })
       };
       getRoleUserTree(param).then(res => {
-        this.rolesList = res;
+        // 排序默认前三个角色
+        let roleIDs = ["role1", "role2", "role3"],
+          firstArr = [],
+          lastArr = [],
+          allList = [];
+        if (res && res.length) {
+          res.forEach(item => {
+            if (roleIDs.includes(item.ID)) {
+              firstArr.push(item);
+            } else {
+              lastArr.push(item);
+            }
+          });
+        }
+        let sortRes = firstArr.sort(this.compare("CODE"));
+        allList = sortRes.concat(lastArr);
+        this.rolesList = allList;
       });
     },
 
     // 角色组下的用户列表
     getUserScope(row) {
       let text = row.children.length
-        ? row.children.map(item => item.text).join(",")
+        ? row.children.map(item => item.text).join("，")
         : "-";
       if (row.text == "普通员工") {
         text = "默认所有员工";
       }
       return text;
     },
-
+    //初次点击展开时调接口
+    selectChange(val, index, type) {
+      if (val) {
+        this.querySearchAsync("", index, type);
+      }
+    },
     querySearchAsync(queryString, index, type) {
       clearTimeout(this.timeout);
       this.timeout = setTimeout(() => {
@@ -262,7 +325,7 @@ export default {
             this.depForm.depOptions[index].selectLeaders = tempData;
           }
         });
-      }, 10 * Math.random());
+      }, 5 * Math.random());
     },
 
     submitForm(formName) {
@@ -302,21 +365,22 @@ export default {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
-        // center: true,
-        // showCancelButton: false
-      }).then(() => {
-        let param = {
-          ROLEID: row.ID
-        };
-        deleteRole(param).then(res => {
-          if (res.success) {
-            this.$message({
-              message: "删除成功！",
-              type: "success"
-            });
-          }
-        });
-      });
+      })
+        .then(() => {
+          let param = {
+            ROLEID: row.ID
+          };
+          deleteRole(param).then(res => {
+            if (res.success) {
+              this.$message({
+                message: "删除成功！",
+                type: "success"
+              });
+              this.getRoleGroupList();
+            }
+          });
+        })
+        .catch(() => {});
     },
 
     getTreeData(data) {
@@ -370,23 +434,32 @@ export default {
     addRole() {
       this.addRoleVisible = true;
     },
-    roleCancel() {
+    roleCancel(formName) {
       this.addRoleVisible = false;
+      this.$refs[formName].resetFields();
     },
-    submitRole() {
-      let param = {
-        data: JSON.stringify({
-          ISUSE: "1",
-          DES: this.roleForm.DES,
-          NAME: this.roleForm.NAME
-        })
-      };
-      addRole(param).then(res => {
-        this.$message({
-          message: "添加角色成功",
-          type: "success"
-        });
-        this.addRoleVisible = false;
+    submitRole(formName) {
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          let param = {
+            data: JSON.stringify({
+              ISUSE: "1",
+              DES: this.roleForm.DES,
+              NAME: this.roleForm.NAME
+            })
+          };
+          addRole(param).then(res => {
+            if (res.success) {
+              this.$message({
+                message: "添加角色成功",
+                type: "success"
+              });
+              this.addRoleVisible = false;
+              this.$refs[formName].resetFields();
+              this.getRoleGroupList();
+            }
+          });
+        }
       });
     }
   }
@@ -402,6 +475,7 @@ export default {
 }
 .demo-ruleForm {
   margin-top: 20px;
+  margin-left: -60px;
 }
 .systemBox {
   width: 800px;

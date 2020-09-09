@@ -42,15 +42,11 @@ export default {
       checkedItems: []
     };
   },
-  mounted() {
-    console.log("treeData111", this.treeData);
-  },
+  mounted() {},
 
   methods: {
     //点击父节点 选中全部
     handleCheckAllChange(val, tree) {
-      // console.log("val", val);
-      // console.log("tree", tree);
       let childrenIds = tree.children.map(item => item.RESID);
       let checkeds = this.checkedItems;
       let curChecked = checkeds.concat(childrenIds);
@@ -61,7 +57,6 @@ export default {
         }
       });
       this.checkedItems = val ? curChecked : delChecked;
-      // console.log("this.checkedItems", this.checkedItems);
       tree.isIndeterminate = false;
     },
 
@@ -90,8 +85,6 @@ export default {
     },
 
     submit() {
-      console.log("this.treeData", this.treeData);
-      console.log("this.checkedItems", this.checkedItems);
       let parentItem = [];
       // 循环树中父节点的状态是半选或全选时，即有子节点勾选的父节点都要传
       this.treeData.forEach(item => {
@@ -100,15 +93,16 @@ export default {
         }
       });
       let allCheckedIDs = this.checkedItems.concat(parentItem);
-      console.log("allCheckedIDs", allCheckedIDs);
+      let uniqueCheckedIDs = [...new Set(allCheckedIDs)];
       let param = {
         data: JSON.stringify({
           ROLEID: this.curRole.ID,
-          RESID: allCheckedIDs
+          RESID: uniqueCheckedIDs
         })
       };
       saveAuth(param).then(res => {
         if (res.success) {
+          this.$emit("update:dialogVisible", false);
           this.$message({
             message: "提交成功",
             type: "success"

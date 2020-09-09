@@ -10,7 +10,6 @@ const user = {
     userInfo: state => state.userInfo,
   },
   mutations: {
-
     SET_UserInfo: (state, userInfo) => {
       state.userInfo = userInfo
     },

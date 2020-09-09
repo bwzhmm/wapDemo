@@ -15,7 +15,7 @@ module.exports = {
   devServer: {
     open: true,
     // host: '172.20.2.222', //本机ip
-    host: '127.0.0.1',
+    host: 'localhost',
     port: 8809,
     proxy: {
       '/': {

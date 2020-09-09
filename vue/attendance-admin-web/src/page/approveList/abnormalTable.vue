@@ -22,14 +22,17 @@
         <el-button @click="handleQuery()" type="primary" size="small">查询</el-button>
       </div>
     </div>
-    <el-table :data="tableData" style="width: 100%">
+    <el-table :data="tableData" style="width: 100%" v-show="active==0">
       <el-table-column label="序号" type="index" align="center"></el-table-column>
       <el-table-column prop="NAME" label="申请人" align="center"></el-table-column>
       <el-table-column prop="DAY" label="考勤日期" align="center">
         <template slot-scope="scope">{{ formatDay(scope.row.DAY)}}</template>
       </el-table-column>
-      <el-table-column prop="CHECKTIME" label="打卡时间" align="center">
-        <template slot-scope="scope">{{ formatStrTime(scope.row.CHECKTIME)||'-'}}</template>
+      <el-table-column prop="CHECKTIME" label="最早打卡时间" align="center">
+        <template slot-scope="scope">{{ formatStrTime(scope.row.CHECKTIME)||'-' }}</template>
+      </el-table-column>
+      <el-table-column prop="LASTCHECKTIME" label="最晚打卡时间" align="center">
+        <template slot-scope="scope">{{ formatStrTime(scope.row.LASTCHECKTIME)||'-' }}</template>
       </el-table-column>
       <el-table-column prop="CHECKRESULT_OLD" label="原考勤结果" align="center">
         <template slot-scope="scope">{{ checkState[scope.row.CHECKRESULT_OLD]||'-'}}</template>
@@ -38,15 +41,12 @@
         <template slot-scope="scope">{{ checkState[scope.row.CHECKRESULT_NEW]||'-'}}</template>
       </el-table-column>
       <el-table-column prop="EXPLANATION" label="情况说明" width="250" align="center">
-        <template slot-scope="scope">{{scope.row.EXPLANATION||'-'}}</template>
+        <template slot-scope="scope">{{ scope.row.EXPLANATION||'-'}}</template>
       </el-table-column>
-      <el-table-column prop="EXCCREATETIME" label="创建时间" align="center" v-if="active ==0">
+      <el-table-column prop="EXCCREATETIME" label="创建时间" align="center" width="150">
         <template slot-scope="scope">{{ formatTimes(scope.row.EXCCREATETIME)}}</template>
       </el-table-column>
-      <el-table-column v-else prop="OVERTIME" label="加班时长" width="200" align="center">
-        <template slot-scope="scope">{{scope.row.OVERTIME||'-'}}</template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" v-if="active==0">
+      <el-table-column label="操作" align="center">
         <template slot-scope="scope">
           <el-button
             @click="handleClick(scope.row)"
@@ -63,41 +63,79 @@
         </template>
       </el-table-column>
     </el-table>
+    <el-table :data="tableData" style="width: 100%" v-show="active==1">
+      <el-table-column label="序号" type="index" align="center"></el-table-column>
+      <el-table-column prop="NAME" label="申请人" align="center"></el-table-column>
+      <el-table-column prop="DAY" label="考勤日期" align="center">
+        <template slot-scope="scope">{{ formatDay(scope.row.DAY)}}</template>
+      </el-table-column>
+      <el-table-column prop="CHECKTIME" label="最早打卡时间" align="center">
+        <template
+          slot-scope="scope"
+        >{{ scope.row.ISCHECK=='1'? formatStrTime(scope.row.CHECKTIME)||'-' :'-'}}</template>
+      </el-table-column>
+      <el-table-column prop="LASTCHECKTIME" label="最晚打卡时间" align="center">
+        <template
+          slot-scope="scope"
+        >{{ scope.row.ISCHECK=='1'? formatStrTime(scope.row.LASTCHECKTIME)||'-' :'-'}}</template>
+      </el-table-column>
+      <el-table-column prop="CHECKRESULT_OLD" label="原考勤结果" align="center">
+        <template
+          slot-scope="scope"
+        >{{ scope.row.ISCHECK=='1'? checkState[scope.row.CHECKRESULT_OLD]||'-':'-'}}</template>
+      </el-table-column>
+      <el-table-column prop="CHECKRESULT_NEW" label="调整结果" align="center">
+        <template
+          slot-scope="scope"
+        >{{ scope.row.ISCHECK=='1'? checkState[scope.row.CHECKRESULT_NEW]||'-':'-'}}</template>
+      </el-table-column>
+      <el-table-column prop="EXPLANATION" label="情况说明" width="250" align="center">
+        <template slot-scope="scope">{{ scope.row.ISCHECK=='1'?scope.row.EXPLANATION||'-':'-'}}</template>
+      </el-table-column>
+      <el-table-column prop="OVERTIME" label="加班时长" align="center" width="200">
+        <template slot-scope="scope">{{ scope.row.ISCHECK=='1'?scope.row.OVERTIME||'-':'-'}}</template>
+      </el-table-column>
+    </el-table>
     <div class="pagination">
       <el-pagination
         background
-        layout="prev, pager, next"
         :total="total"
         :page-size="pagesize"
         :current-page="currentPage"
+        layout="sizes,prev, pager, next"
+        :page-sizes="[10, 20, 50, 100,200]"
+        @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       ></el-pagination>
     </div>
     <el-dialog title="异常申请" :visible.sync="dialogVisible" width="600px">
-      <p>
-        <span class="label-text opacity_65">申请人：</span>
-        <span class="content">{{applyForm.NAME}}</span>
-      </p>
-      <p>
-        <span class="label-text opacity_65">考勤日期：</span>
-        <span class="content">{{formatDay(applyForm.DAY)}}</span>
-      </p>
-      <p>
-        <span class="label-text opacity_65">打卡时间：</span>
-        <span class="content opacity_85">{{ formatStrTime(applyForm.CHECKTIME)}}</span>
-      </p>
-      <p>
-        <span class="label-text opacity_65">原考勤结果：</span>
-        <span class="content opacity_85">{{checkState[applyForm.CHECKRESULT_OLD]}}</span>
-      </p>
-      <p>
-        <span class="label-text opacity_65">调整结果：</span>
-        <span class="content opacity_85">{{checkState[applyForm.CHECKRESULT_NEW]}}</span>
-      </p>
-      <p>
-        <span class="label-text opacity_65">情况说明：</span>
-        <span class="content opacity_85">{{applyForm.EXPLANATION}}</span>
-      </p>
+      <div class="tips_box">
+        <i class="el-icon-warning"></i>
+        <span>请驳回因请假未能打卡的异常申请，建议提交请假调休申请。</span>
+      </div>
+      <el-form label-width="120px">
+        <el-form-item label="申请人：" class="label-text opacity_65">
+          <span class="content opacity_85">{{applyForm.NAME}}</span>
+        </el-form-item>
+        <el-form-item label="考勤日期：" class="label-text opacity_65">
+          <span class="content opacity_85">{{formatDay(applyForm.DAY)}}</span>
+        </el-form-item>
+        <el-form-item label="最早打卡时间：" class="label-text opacity_65">
+          <span class="content opacity_85">{{ formatStrTime(applyForm.CHECKTIME) || '-'}}</span>
+        </el-form-item>
+        <el-form-item label="最晚打卡时间：" class="label-text opacity_65">
+          <span class="content opacity_85">{{ formatStrTime(applyForm.LASTCHECKTIME) || '-'}}</span>
+        </el-form-item>
+        <el-form-item label="原考勤结果：" class="label-text opacity_65">
+          <span class="content opacity_85">{{checkState[applyForm.CHECKRESULT_OLD]}}</span>
+        </el-form-item>
+        <el-form-item label="调整结果：" class="label-text opacity_65">
+          <span class="content opacity_85">{{checkState[applyForm.CHECKRESULT_NEW]}}</span>
+        </el-form-item>
+        <el-form-item label="情况说明：" class="label-text opacity_65">
+          <span class="content opacity_85">{{applyForm.EXPLANATION}}</span>
+        </el-form-item>
+      </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="handleApprove('3')">驳回</el-button>
         <el-button type="primary" @click="handleApprove('2')">通过</el-button>
@@ -164,6 +202,7 @@ export default {
       this.queryName = "";
       this.queryDay = nowYMD("");
       this.page = 1;
+      this.pagesize = 10;
       this.getList();
     },
 
@@ -176,9 +215,7 @@ export default {
     formatTimes(day) {
       return day ? util.formatTime(day, "YYYY-MM-DD hh:mm:ss") : "";
     },
-    formatStrTime(time) {
-      return time ? formatStr(time, ":", true) : "";
-    },
+
     handleClick(row) {
       let param = {
         id: row.ID
@@ -252,6 +289,11 @@ export default {
       this.currentPage = 1;
       this.getList();
     },
+    handleSizeChange(val) {
+      this.pagesize = val;
+      this.currentPage = 1;
+      this.getList();
+    },
 
     handleCurrentChange(currentPage) {
       this.currentPage = currentPage;
@@ -297,9 +339,5 @@ ul li.active {
   width: 200px;
   display: inline-block;
   margin-right: 20px;
-}
-
-p:last-child {
-  margin-bottom: 80px;
 }
 </style>

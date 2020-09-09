@@ -34,7 +34,6 @@ export default {
 
   computed: {
     userInfo() {
-      console.log("state", this.$store.state);
       return this.$store.state.user.userInfo;
     },
     allmenus() {
@@ -47,7 +46,6 @@ export default {
     // 点击父菜单，传递当前父对应的子菜单
     handleClick(child) {
       let allmenus = this.allmenus;
-      console.log("childssss", child);
       let childmenu = [];
       allmenus.forEach(item => {
         if (item.NAME == child) {
@@ -57,13 +55,10 @@ export default {
       childmenu = childmenu.length
         ? childmenu.map(item => item.DISPLAYURL)
         : [];
-
-      // childmenu = ["abnormalTable", "leaveTable"];
-      console.log("childmenusss", childmenu);
-      //  console.log("submenus", menuData);
-
       this.$store.commit("SET_SubMenus", childmenu);
     },
+
+    //登出
     loginOut() {
       window.location.href = window.global.exitURL + window.location.href;
     }

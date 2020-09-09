@@ -3,16 +3,20 @@
     <div class="table_head">
       <h4>员工管理</h4>
       <div>
-        <el-input v-model="queryName" class="query-picker" placeholder="请输入姓名"></el-input>
+        <el-input v-model="queryName" class="query-picker" placeholder="请输入姓名" clearable></el-input>
         <el-button @click="handleQuery()" type="primary" size="small">查询</el-button>
+        <el-divider class="divider" direction="vertical"></el-divider>
+        <el-button @click="handleSnyc()" type="primary" size="small">同步</el-button>
       </div>
     </div>
     <el-table :data="tableData" style="width: 100%">
       <el-table-column label="序号" type="index" align="center"></el-table-column>
-      <el-table-column prop="ORGNAME" label="部门" align="center"></el-table-column>
+      <el-table-column prop="ORGNAME" label="部门" align="center">
+        <template slot-scope="scope">{{ scope.row.ORGNAME||'-'}}</template>
+      </el-table-column>
       <el-table-column prop="NAME" label="姓名" align="center"></el-table-column>
       <el-table-column prop="SEX" label="性别" align="center">
-        <template slot-scope="scope">{{ scope.row.SEX=='2'?"女":'男'}}</template>
+        <template slot-scope="scope">{{ scope.row.SEX=='2'?"女":scope.row.SEX=='1'&&'男'||'-'}}</template>
       </el-table-column>
       <el-table-column prop="BIRTHDAY" label="出生日期" align="center">
         <template slot-scope="scope">{{ formatDay(scope.row.BIRTHDAY) ||'-'}}</template>
@@ -39,10 +43,12 @@
     <div class="pagination">
       <el-pagination
         background
-        layout="prev, pager, next"
         :total="total"
         :page-size="pagesize"
         :current-page="currentPage"
+        layout="sizes,prev, pager, next"
+        :page-sizes="[10, 20, 50, 100,200]"
+        @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       ></el-pagination>
     </div>
@@ -50,7 +56,7 @@
       <div class="tips_box">
         <i class="el-icon-warning"></i>
         <span>
-          新增账号默认密码为
+          员工账号默认密码为
           <i class="blueColor">123456</i>。
         </span>
       </div>
@@ -121,7 +127,7 @@
               prop="NAME"
               :rules="[ { required: true, message: '请填写姓名', trigger: 'blur' }  ]"
             >
-              <el-input v-model="staffList.NAME"></el-input>
+              <el-input v-model="staffList.NAME" :disabled="true"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="10">
@@ -169,7 +175,7 @@
 </template>
 
 <script>
-import { fetchUserList, fetchUserById, updateUser } from "@/api/user";
+import { fetchUserList, fetchUserById, updateUser, syncUser } from "@/api/user";
 import { fetchOrgList } from "@/api/auth";
 import { stringDay, dataDiffYear } from "@/utils/common";
 import util from "@/utils/util";
@@ -213,6 +219,19 @@ export default {
       let start = day ? util.formatTime(day, "YYYY-MM-DD") : "";
       let end = util.formatTime(Date.now(), "YYYY-MM-DD");
       return dataDiffYear(start, end);
+    },
+
+    handleSnyc() {
+      let param = {};
+      syncUser().then(res => {
+        if (res.success) {
+          this.getUserList();
+          this.$message({
+            message: "同步成功",
+            type: "success"
+          });
+        }
+      });
     },
 
     handleEdit(row) {
@@ -271,6 +290,11 @@ export default {
     },
 
     handleQuery() {
+      this.currentPage = 1;
+      this.getUserList();
+    },
+    handleSizeChange(val) {
+      this.pagesize = val;
       this.currentPage = 1;
       this.getUserList();
     },

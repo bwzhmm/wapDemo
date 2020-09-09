@@ -73,6 +73,13 @@ export function approveRest(data) {
   })
 };
 
+export function getRestDays(data) {
+  return service.postAjax({
+    code: 'check',
+    url: '/check/rest/Record/getRestDays',
+    data,
+  })
+};
 
 
 //  绩效考核

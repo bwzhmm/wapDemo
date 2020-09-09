@@ -14,7 +14,7 @@
           type="month"
           placeholder="请选择月份"
         ></el-date-picker>
-        <el-select class="query-datapicker" v-model="depvalue" placeholder="请选择部门">
+        <el-select class="query-datapicker" v-model="depvalue" placeholder="请选择部门" clearable>
           <el-option v-for="item in depOptions" :key="item.ID" :label="item.NAME" :value="item.ID"></el-option>
         </el-select>
         <el-button @click="handleQuery()" type="primary" size="small">查询</el-button>
@@ -25,7 +25,7 @@
       <el-table-column prop="ORGNAME" label="部门" align="center"></el-table-column>
       <el-table-column prop="NAME" label="姓名" align="center"></el-table-column>
       <el-table-column prop="SEX" label="性别" align="center">
-        <template slot-scope="scope">{{ scope.row.SEX=='2'?"女":'男'}}</template>
+        <template slot-scope="scope">{{ scope.row.SEX=='2'?"女":scope.row.SEX=='1'&&'男'||'-'}}</template>
       </el-table-column>
       <el-table-column prop="BIRTHDAY" label="出生日期" align="center">
         <template slot-scope="scope">{{ formatDay(scope.row.BIRTHDAY)}}</template>
@@ -43,10 +43,12 @@
     <div class="pagination">
       <el-pagination
         background
-        layout="prev, pager, next"
         :total="total"
         :page-size="pagesize"
         :current-page="currentPage"
+        layout="sizes,prev, pager, next"
+        :page-sizes="[10, 20, 50, 100,200]"
+        @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       ></el-pagination>
     </div>
@@ -115,6 +117,11 @@ export default {
     },
 
     handleQuery() {
+      this.currentPage = 1;
+      this.getUserList();
+    },
+    handleSizeChange(val) {
+      this.pagesize = val;
       this.currentPage = 1;
       this.getUserList();
     },

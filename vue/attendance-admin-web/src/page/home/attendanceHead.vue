@@ -4,6 +4,7 @@
     <div class="month-left cflex">
       <h3 class="h3-text">{{today}}</h3>
       <span class="opacity_65">- {{NowChMonth}} -</span>
+
       <span class="blueColor">{{ISWORKDAY =='1' ? '工作日':'非工作日'}}</span>
     </div>
     <el-divider direction="vertical"></el-divider>
@@ -65,8 +66,6 @@ export default {
     today: function() {
       let nowDate = new Date();
       let day = nowDate.getDate();
-      console.log("month", day);
-
       return day;
     },
     NowChMonth: function() {
@@ -100,14 +99,15 @@ export default {
           } else {
             this.personInfo = res.item;
           }
-          // console.log("personInfo", res.item);
         }
       });
     },
     getTodayList() {
       //首页左上角 今日考勤状态
       fetchTodayInfo().then(res => {
-        this.ISWORKDAY = res && res.item.ISWORKDAY;
+        if (res.success) {
+          this.ISWORKDAY = res.item.ISWORKDAY;
+        }
       });
       this.getPersonInfo(false);
     },
@@ -115,13 +115,11 @@ export default {
       let strday = this.prevMonth(this.curYearMonth);
       this.curYearMonth = strday;
       this.getPersonInfo(true);
-      // console.log("123333", this.curYearMonth);
     },
     getNextMonth() {
       let strday = this.nextMonth(this.curYearMonth);
       this.curYearMonth = strday;
       this.getPersonInfo(true);
-      // console.log("124444", this.curYearMonth);
     },
     // 前一个月
     prevMonth(date) {
@@ -198,6 +196,7 @@ export default {
     width: 39px;
     height: 45px;
     line-height: 45px;
+    text-align: center;
   }
 }
 .month-info {

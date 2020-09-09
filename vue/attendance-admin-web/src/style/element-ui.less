@@ -1,10 +1,16 @@
  //覆盖一些element-ui样式
-
+ .el-button--primary {
+  background-color: #1890FF !important;
+  border-color: #1890FF !important;
+}
+.el-button--text {
+  color: #1890FF !important;
+}
  .el-table thead{
-  color: #000 !important;
+  color:rgba(0,0,0,.85)  !important;
  }
  .el-table{
-  color: #000 !important;
+  color:rgba(0,0,0,.65)  !important;
  }
  .el-table td,.el-table th.is-leaf {
   border-bottom: 1px dashed #F0F0F0  !important;
@@ -36,10 +42,10 @@ background: rgba(0,0,0,0.02)  !important;
 .el-dialog__footer{
   border-top: 1px solid #f0f0f0;
 }
-.el-input--mini .el-input__inner {
-  height: 32px !important;
-  line-height: 32px !important;
-}
+// .el-input--mini .el-input__inner {
+//   height: 32px !important;
+//   line-height: 32px !important;
+// }
 //  tab样式 带背景色
 .tab-left.el-tabs--left .el-tabs__item.is-left {
   text-align: center !important;
@@ -80,7 +86,7 @@ background: rgba(0,0,0,0.02)  !important;
   width: 2px;
 }
 
-//弹出框提示
+//confirm弹出框提示
 .el-message-box__status.el-icon-success {
   color: #1890ff !important;
 }
@@ -93,33 +99,23 @@ background: rgba(0,0,0,0.02)  !important;
   text-align: right !important;
 }
 
+.el-message-box__title{
+  font-size: 16px !important;
+  color:rgba(0,0,0,0.85) !important;
+}
 
-// // 设置左侧菜单栏 start
-// .el-menu {
-//     border: none;
-//     height: 100%;
-  
-//     .dropItem{
-//       padding: 0 6px !important;
-//       .svg-icon{
-//         margin-right: 5px;
-//       }
-//     }
-//     .el-tooltip,
-//     .el-submenu__title{
-//        padding: 0 6px !important;
-//     }
-// }
-// .el-menu--horizontal{
-//   border: none;
-// }
-// .el-submenu{
-//   .svg-icon{
-//     margin-right: 5px;
-//   }
-// }
-// // 设置左侧菜单栏 end
-
-
+.el-drawer__header {
+  padding: 15px 20px 15px !important;
+  border-bottom: 1px solid #eeeeee;
+  margin-bottom: 20px;
+  span {
+    color: #333;
+    font-weight: 400;
+    line-height: 20px;
+  }
+}
+.el-drawer__body {
+  padding: 0 10px;
+}
 
 

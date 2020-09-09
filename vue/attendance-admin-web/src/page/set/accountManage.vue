@@ -3,7 +3,7 @@
     <div class="table_head">
       <h4>账号管理</h4>
       <div>
-        <el-input v-model="queryName" class="query-picker" placeholder="请输入姓名"></el-input>
+        <el-input v-model="queryName" class="query-picker" placeholder="请输入姓名" clearable></el-input>
         <el-button @click="handleQuery()" type="primary" size="small">查询</el-button>
       </div>
     </div>
@@ -12,7 +12,7 @@
       <el-table-column prop="ORGNAME" label="部门" align="center"></el-table-column>
       <el-table-column prop="NAME" label="姓名" align="center"></el-table-column>
       <el-table-column prop="SEX" label="性别" align="center">
-        <template slot-scope="scope">{{ scope.row.SEX=='2'?"女":'男'}}</template>
+        <template slot-scope="scope">{{ scope.row.SEX=='2'?"女":scope.row.SEX=='1'&&'男'||'-'}}</template>
       </el-table-column>
       <el-table-column prop="LOGINNAME" label="登录账号" align="center"></el-table-column>
       <el-table-column label="操作" align="center">
@@ -24,10 +24,12 @@
     <div class="pagination">
       <el-pagination
         background
-        layout="prev, pager, next"
         :total="total"
         :page-size="pagesize"
         :current-page="currentPage"
+        layout="sizes,prev, pager, next"
+        :page-sizes="[10, 20, 50, 100,200]"
+        @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       ></el-pagination>
     </div>
@@ -56,21 +58,23 @@ export default {
         type: "warning",
         center: true,
         showCancelButton: false
-      }).then(() => {
-        let param = {
-          data: JSON.stringify({
-            ID: row.ID
-          })
-        };
-        resetPassword(param).then(res => {
-          if (res.success) {
-            this.$message({
-              message: "重置密码成功！",
-              type: "success"
-            });
-          }
-        });
-      });
+      })
+        .then(() => {
+          let param = {
+            data: JSON.stringify({
+              ID: row.ID
+            })
+          };
+          resetPassword(param).then(res => {
+            if (res.success) {
+              this.$message({
+                message: "重置密码成功！",
+                type: "success"
+              });
+            }
+          });
+        })
+        .catch(() => {});
     },
 
     getUserList() {
@@ -89,6 +93,11 @@ export default {
       });
     },
     handleQuery() {
+      this.currentPage = 1;
+      this.getUserList();
+    },
+    handleSizeChange(val) {
+      this.pagesize = val;
       this.currentPage = 1;
       this.getUserList();
     },

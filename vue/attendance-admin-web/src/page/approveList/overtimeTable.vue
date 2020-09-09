@@ -3,7 +3,7 @@
     <div class="table_head">
       <h4>加班申请</h4>
       <div>
-        <el-input v-model="queryName" class="query-picker" placeholder="请输入姓名"></el-input>
+        <el-input v-model="queryName" class="query-picker" placeholder="请输入姓名" clearable></el-input>
         <el-button @click="handleQuery()" type="primary" size="small">查询</el-button>
       </div>
     </div>
@@ -13,9 +13,15 @@
       <el-table-column prop="DAY" label="加班日期" align="center">
         <template slot-scope="scope">{{ formatDay(scope.row.DAY)}}</template>
       </el-table-column>
-      <el-table-column prop="HOURS" label="加班时长（h）" width="110" align="center"></el-table-column>
-      <el-table-column prop="REASON" label="加班原因" align="center"></el-table-column>
-      <el-table-column prop="STATE" label="申请状态" width="100" align="center">
+      <el-table-column prop="CHECKTIME" label="最早打卡时间" align="center">
+        <template slot-scope="scope">{{ formatStrTime(scope.row.CHECKTIME)||'-' }}</template>
+      </el-table-column>
+      <el-table-column prop="LASTCHECKTIME" label="最晚打卡时间" align="center">
+        <template slot-scope="scope">{{formatStrTime(scope.row.LASTCHECKTIME)||'-'}}</template>
+      </el-table-column>
+      <el-table-column prop="HOURS" label="加班时长（h）" align="center"></el-table-column>
+      <el-table-column prop="REASON" label="加班原因" align="center" width="250"></el-table-column>
+      <el-table-column prop="STATE" label="申请状态" align="center">
         <template slot-scope="scope">{{ overTimeState[scope.row.STATE]}}</template>
       </el-table-column>
       <el-table-column prop="CREATETIME" label="创建时间" align="center">
@@ -41,10 +47,12 @@
     <div class="pagination">
       <el-pagination
         background
-        layout="prev, pager, next"
         :total="total"
         :page-size="pagesize"
         :current-page="currentPage"
+        layout="sizes,prev, pager, next"
+        :page-sizes="[10, 20, 50, 100,200]"
+        @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       ></el-pagination>
     </div>
@@ -53,22 +61,26 @@
         <i class="el-icon-warning"></i>
         <span>工作日加班时间从19:00起计算。</span>
       </div>
-      <p>
-        <span class="label-text opacity_65">申请人：</span>
-        <span class="content">{{formDetails.NAME}}</span>
-      </p>
-      <p>
-        <span class="label-text opacity_65">加班日期：</span>
-        <span class="content">{{ formatDay(formDetails.DAY)}}</span>
-      </p>
-      <p>
-        <span class="label-text opacity_65">加班时长：</span>
-        <span class="content opacity_85">{{formDetails.HOURS}}</span>
-      </p>
-      <p>
-        <span class="label-text opacity_65">加班原因：</span>
-        <span class="content opacity_85">{{formDetails.REASON}}</span>
-      </p>
+      <el-form label-width="120px">
+        <el-form-item label="申请人：" class="label-text opacity_65">
+          <span class="content opacity_85">{{formDetails.NAME}}</span>
+        </el-form-item>
+        <el-form-item label="加班日期：" class="label-text opacity_65">
+          <span class="content opacity_85">{{ formatDay(formDetails.DAY)}}</span>
+        </el-form-item>
+        <el-form-item label="加班时长：" class="label-text opacity_65">
+          <span class="content opacity_85">{{formDetails.HOURS}}小时</span>
+        </el-form-item>
+        <el-form-item label="最早打卡时间：" class="label-text opacity_65">
+          <span class="content opacity_85">{{formatStrTime(formDetails.CHECKTIME) ||''}}</span>
+        </el-form-item>
+        <el-form-item label="最晚打卡时间：" class="label-text opacity_65">
+          <span class="content opacity_85">{{formatStrTime(formDetails.LASTCHECKTIME) ||''}}</span>
+        </el-form-item>
+        <el-form-item label="加班原因：" class="label-text opacity_65">
+          <span class="content opacity_85">{{formDetails.REASON}}</span>
+        </el-form-item>
+      </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="handleApprove(2)">驳回</el-button>
         <el-button type="primary" @click="handleApprove(1)">通过</el-button>
@@ -79,6 +91,7 @@
 
 <script>
 import { fetchOvertimeList, selectById, approve } from "@/api/approval";
+import { formatStr } from "@/utils/common";
 import util from "@/utils/util";
 export default {
   data() {
@@ -113,6 +126,9 @@ export default {
     formatTimes(day) {
       return day ? util.formatTime(day, "YYYY-MM-DD hh:mm:ss") : "";
     },
+    formatStrTime(time) {
+      return time ? formatStr(time, ":", true) : "";
+    },
 
     handleClick(row) {
       selectById({ id: row.ID }).then(res => {
@@ -138,6 +154,11 @@ export default {
       });
     },
     handleQuery() {
+      this.currentPage = 1;
+      this.getOvertimeList();
+    },
+    handleSizeChange(val) {
+      this.pagesize = val;
       this.currentPage = 1;
       this.getOvertimeList();
     },
@@ -181,9 +202,5 @@ export default {
   width: 200px;
   display: inline-block;
   margin-right: 20px;
-}
-
-p:last-child {
-  margin-bottom: 50px;
 }
 </style>

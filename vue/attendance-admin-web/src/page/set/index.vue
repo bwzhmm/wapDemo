@@ -6,10 +6,10 @@
           :key="item.name"
           :label="item.title"
           :name="item.name"
-          v-if="curSubmenus.includes(item.name)"
           lazy
+          v-if="curSubmenus.includes(item.name)"
         >
-          <component :is="item.name"></component>
+          <component v-if="menuTabsValue==item.name" :is="item.name"></component>
         </el-tab-pane>
       </template>
     </el-tabs>
@@ -22,10 +22,11 @@ import editPassword from "./editPassword";
 import accountManage from "./accountManage";
 import systemSet from "./systemSet";
 import authManage from "./authManage";
-import page401 from "../errorPage/401"; // 无权限
+import expatriateStaff from "./expatriateStaff";
 export default {
   data() {
     return {
+      isToggle: false,
       menuTabsValue: "",
       menuTabs: [
         {
@@ -43,6 +44,10 @@ export default {
         {
           title: "权限管理",
           name: "authManage"
+        },
+        {
+          title: "外派驻场",
+          name: "expatriateStaff"
         }
       ]
     };
@@ -52,20 +57,28 @@ export default {
     accountManage,
     systemSet,
     authManage,
-    page401
+    expatriateStaff
   },
   created() {},
-  mounted() {},
+  mounted() {
+    this.menuTabsValue = this.curSubmenus[0] || "editPassword";
+  },
   computed: {
     curSubmenus: function() {
       if (this.$store.state.menu.submenus.length) {
-        this.menuTabsValue = this.$store.state.menu.submenus[0];
-        console.log("state222", this.menuTabsValue);
+        if (!this.isToggle) {
+          this.menuTabsValue = this.$store.state.menu.submenus[0];
+        }
       }
       return this.$store.state.menu.submenus;
     }
   },
-  methods: {}
+  methods: {
+    handleClickTab(tab, event) {
+      this.isToggle = true;
+      this.menuTabsValue = tab.name;
+    }
+  }
 };
 </script>
 

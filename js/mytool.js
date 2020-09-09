@@ -16,39 +16,3 @@ compare(prop) {
     };
 }
 
-// 监听事件
-changeSort(column) {
-    console.log(column);
-    //获取字段名称和排序类型
-    var fieldName = column.prop;
-    var sortingType = column.order;
-    //如果字段名称为“创建时间”，将“创建时间”转换为时间戳，才能进行大小比较
-    //   if(fieldName=="createTime"){
-    //     this.tableData.map(item => {
-    //          item.createTime = this.$moment(item.createTime).valueOf();
-    //     });
-    //  }
-
-    //按照降序排序
-    if (sortingType == "descending") {
-        this.tableData = this.tableData.sort(
-            (a, b) => b[fieldName] - a[fieldName]
-        );
-    }
-    //按照升序排序
-    else {
-        this.tableData = this.tableData.sort(
-            (a, b) => a[fieldName] - b[fieldName]
-        );
-    }
-    //如果字段名称为“创建时间”，将时间戳格式的“创建时间”再转换为时间格式
-    //   if(fieldName=="createTime"){
-    //     this.tableData.map(item => {
-    //         item.createTime = this.$moment(item.createTime).format(
-    //              "YYYY-MM-DD HH:mm:ss"
-    //         );
-    //     });
-    // }
-
-    console.log(this.tableData);
-},

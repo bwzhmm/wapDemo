@@ -68,6 +68,8 @@ export function fetchMonthStatistic(data) {
   })
 };
 
+
+//同步考勤记录
 export function syncRecord(data) {
   return service.postAjax({
     code: 'check',

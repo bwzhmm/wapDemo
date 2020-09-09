@@ -60,8 +60,17 @@ export function resetPassword(data) {
   })
 };
 
+// 同步用户
+export function syncUser(data) {
+  return service.postAjax({
+    code: 'check',
+    url: '/check/rest/User/sync',
+    data,
+  })
+}
 
-//获取菜单
+
+//获取该用户拥有的菜单
 export function fetchUserMenu(data) {
   return service.postAjax({
     code: "appportal",
@@ -70,6 +79,7 @@ export function fetchUserMenu(data) {
   })
 }
 
+//获取当前登录的用户
 export function fetchCurrentUser(data) {
   return service.postAjax({
     code: "appportal",
@@ -78,37 +88,43 @@ export function fetchCurrentUser(data) {
   })
 }
 
+//外派驻场
 
-export function login(params) {
-  return service({
-    url: '/user/login',
-    method: 'get',
-    data: params
-  })
-}
-export function logout(params) {
-  return service({
-    url: '/user/logout',
-    method: 'get',
-    data: params
+export function fetchExpatriateList(data) {
+  return service.postAjax({
+    code: "check",
+    url: '/check/rest/Expatriate/list',
+    data,
   })
 }
 
-
-export function getUserInfo(params) {
-  return service({
-    url: '/user/info/get',
-    method: 'get',
-    data: params
+export function insertExpatriate(data) {
+  return service.postAjax({
+    code: "check",
+    url: '/check/rest/Expatriate/insert',
+    data,
+  })
+}
+export function updateExpatriate(data) {
+  return service.postAjax({
+    code: "check",
+    url: '/check/rest/Expatriate/update',
+    data,
   })
 }
 
-export function getUserList(reqData) {
-  return service({
-    url: '/user/list/get',
-    method: 'get',
-    data: reqData
+export function selectByIdExpatriate(data) {
+  return service.postAjax({
+    code: "check",
+    url: '/check/rest/Expatriate/selectByid',
+    data,
   })
 }
 
-
+export function deleteExpatriate(data) {
+  return service.postAjax({
+    code: "check",
+    url: '/check/rest/Expatriate/delete',
+    data,
+  })
+}

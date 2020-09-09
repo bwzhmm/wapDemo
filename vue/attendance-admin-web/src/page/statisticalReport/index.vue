@@ -14,7 +14,7 @@
           v-if="curSubmenus.includes(item.name)"
           lazy
         >
-          <component :is="item.name"></component>
+          <component v-if="menuTabsValue==item.name" :is="item.name"></component>
         </el-tab-pane>
       </template>
     </el-tabs>
@@ -22,12 +22,12 @@
 </template>
 
 <script>
-import monthReport from "./monthReport"; // 月度报表
+import monthReport from "./month/report"; // 月度报表
 import annualReport from "./annualReport"; // 年度报表
-import page401 from "../errorPage/401"; // 无权限
 export default {
   data() {
     return {
+      isToggle: false,
       menuTabsValue: "",
       menuTabs: [
         {
@@ -43,22 +43,27 @@ export default {
   },
   components: {
     monthReport,
-    annualReport,
-    page401
+    annualReport
   },
   computed: {
     curSubmenus() {
       if (this.$store.state.menu.submenus.length) {
-        this.menuTabsValue = this.$store.state.menu.submenus[0];
-        console.log("state222", this.menuTabsValue);
+        if (!this.isToggle) {
+          this.menuTabsValue = this.$store.state.menu.submenus[0];
+        }
       }
       return this.$store.state.menu.submenus;
     }
   },
   created() {},
-  mounted() {},
+  mounted() {
+    this.menuTabsValue = this.curSubmenus[0] || "";
+  },
   methods: {
-    handleClickTab(tab, event) {}
+    handleClickTab(tab, event) {
+      this.isToggle = true;
+      this.menuTabsValue = tab.name;
+    }
   }
 };
 </script>

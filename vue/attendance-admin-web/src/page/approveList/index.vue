@@ -14,7 +14,7 @@
           v-if="curSubmenus.includes(item.name)"
           lazy
         >
-          <component :is="item.name"></component>
+          <component v-if="menuTabsValue==item.name" :is="item.name"></component>
         </el-tab-pane>
       </template>
     </el-tabs>
@@ -26,10 +26,10 @@ import abnormalTable from "./abnormalTable"; // 异常申请
 import overtimeTable from "./overtimeTable"; // 加班申请
 import leaveTable from "./leaveTable"; // 请假调休
 import performanceTable from "./performanceTable"; // 绩效考核
-import page401 from "../errorPage/401"; // 无权限
 export default {
   data() {
     return {
+      isToggle: false,
       menuTabsValue: "",
       menuTabs: [
         {
@@ -55,23 +55,30 @@ export default {
     abnormalTable,
     overtimeTable,
     leaveTable,
-    performanceTable,
-    page401
+    performanceTable
   },
   computed: {
     curSubmenus() {
       if (this.$store.state.menu.submenus.length) {
-        this.menuTabsValue = this.$store.state.menu.submenus[0];
-        console.log("state222", this.menuTabsValue);
+        // 刷新页面时，默认展示的子菜单
+        if (!this.isToggle) {
+          this.menuTabsValue = this.$store.state.menu.submenus[0];
+        }
       }
       return this.$store.state.menu.submenus;
     }
   },
 
   created() {},
-  mounted() {},
+  mounted() {
+    // 切换页面时，默认展示的子菜单  不进行计算属性时，初始化值
+    this.menuTabsValue = this.curSubmenus[0] || "";
+  },
   methods: {
-    handleClickTab(tab, event) {}
+    handleClickTab(tab, event) {
+      this.isToggle = true;
+      this.menuTabsValue = tab.name;
+    }
   }
 };
 </script>
